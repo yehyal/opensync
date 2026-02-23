@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+    "opensync-server"
+]
+resolver = "2"
