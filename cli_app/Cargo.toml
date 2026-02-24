@@ -1,0 +1,11 @@
+[package]
+name = "cli_app"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.102"
+clap = "4.5.60"
+config = "0.15.19"
+dotenv = "0.15.0"
+serde = { version = "1", features = ["derive"] }

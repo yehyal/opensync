@@ -1,6 +1,7 @@
 [workspace]
 
 members = [
-    "opensync-server"
+    "opensync-server",
+    "cli_app"
 ]
 resolver = "2"
