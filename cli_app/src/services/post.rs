@@ -1,9 +1,11 @@
 use anyhow::Ok;
+use serde::Deserialize;
 use tokio::sync::Mutex;
 
 use crate::model::{Post, PostStatus};
 use std::collections::HashMap;
 
+#[derive(Deserialize)]
 pub struct CreatePostDTO {
     pub user_id: i64,
     pub title: String,
@@ -12,8 +14,8 @@ pub struct CreatePostDTO {
     pub status: PostStatus,
 }
 
+#[derive(Deserialize)]
 pub struct UpdatePostDTO {
-    pub id: i64,
     pub title: String,
     pub slug: String,
     pub content: String,
@@ -34,9 +36,9 @@ pub trait PostService {
     async fn get_all_posts(&self) -> anyhow::Result<Vec<Post>>;
     async fn get_post_by_id(&self, id: i64) -> anyhow::Result<Post>;
     async fn get_post_by_slug(&self, slug: &str) -> anyhow::Result<Post>;
-    async fn create_post(&mut self, req: CreatePostDTO) -> anyhow::Result<Post>;
-    async fn update_post(&mut self, req: UpdatePostDTO) -> anyhow::Result<Post>;
-    async fn delete_post(&mut self, id: i64) -> anyhow::Result<()>;
+    async fn create_post(&self, req: CreatePostDTO) -> anyhow::Result<Post>;
+    async fn update_post(&self, id: i64, req: UpdatePostDTO) -> anyhow::Result<Post>;
+    async fn delete_post(&self, id: i64) -> anyhow::Result<()>;
 }
 
 impl Default for InMemoryPostService {
@@ -75,7 +77,7 @@ impl PostService for InMemoryPostService {
         anyhow::bail!("Post not found: {}", slug)
     }
 
-    async fn create_post(&mut self, req: CreatePostDTO) -> anyhow::Result<Post> {
+    async fn create_post(&self, req: CreatePostDTO) -> anyhow::Result<Post> {
         let mut data = self.data.lock().await;
         data.counter += 1;
 
@@ -98,16 +100,16 @@ impl PostService for InMemoryPostService {
             None => {
                 anyhow::bail!("Post not found: {}", data.counter)
             }
-            Some(post) => Ok((*post).clone()),
+            Some(post) => Ok(post.clone()),
         }
     }
 
-    async fn update_post(&mut self, req: UpdatePostDTO) -> anyhow::Result<Post> {
+    async fn update_post(&self, id: i64, req: UpdatePostDTO) -> anyhow::Result<Post> {
         let mut data = self.data.lock().await;
         let post = data
             .items
-            .get_mut(&req.id)
-            .ok_or(anyhow::anyhow!("Post not found: {}", req.id))?;
+            .get_mut(&id)
+            .ok_or(anyhow::anyhow!("Post not found: {}", id))?;
 
         post.slug = req.slug;
         post.title = req.title;
@@ -118,7 +120,7 @@ impl PostService for InMemoryPostService {
         Ok((*post).clone())
     }
 
-    async fn delete_post(&mut self, id: i64) -> anyhow::Result<()> {
+    async fn delete_post(&self, id: i64) -> anyhow::Result<()> {
         let mut data = self.data.lock().await;
         match data.items.remove(&id) {
             None => {

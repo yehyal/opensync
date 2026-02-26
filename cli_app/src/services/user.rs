@@ -28,13 +28,24 @@ pub struct UserService {
     pub data: Mutex<InMemoryUserStore>,
 }
 
+impl Default for UserService {
+    fn default() -> Self {
+        Self {
+            data: Mutex::new(InMemoryUserStore {
+                counter: 0,
+                items: Default::default(),
+            }),
+        }
+    }
+}
+
 #[allow(async_fn_in_trait)]
 pub trait UserServiceImpl {
     async fn get_all_users(&self) -> anyhow::Result<Vec<User>>;
     async fn get_user_by_id(&self, id: i64) -> anyhow::Result<User>;
-    async fn create_user(&mut self, req: CreateUserDTO) -> anyhow::Result<User>;
-    async fn update_user(&mut self, id: i64, req: UpdateUserDTO) -> anyhow::Result<User>;
-    async fn delete_user(&mut self, id: i64) -> anyhow::Result<()>;
+    async fn create_user(&self, req: CreateUserDTO) -> anyhow::Result<User>;
+    async fn update_user(&self, id: i64, req: UpdateUserDTO) -> anyhow::Result<User>;
+    async fn delete_user(&self, id: i64) -> anyhow::Result<()>;
 }
 
 impl UserServiceImpl for UserService {
@@ -56,7 +67,7 @@ impl UserServiceImpl for UserService {
         }
     }
 
-    async fn create_user(&mut self, req: CreateUserDTO) -> anyhow::Result<User> {
+    async fn create_user(&self, req: CreateUserDTO) -> anyhow::Result<User> {
         let mut data = self.data.lock().await;
         data.counter += 1;
 
@@ -83,7 +94,7 @@ impl UserServiceImpl for UserService {
         }
     }
 
-    async fn update_user(&mut self, id: i64, req: UpdateUserDTO) -> anyhow::Result<User> {
+    async fn update_user(&self, id: i64, req: UpdateUserDTO) -> anyhow::Result<User> {
         let mut data = self.data.lock().await;
 
         let user = data
@@ -105,7 +116,7 @@ impl UserServiceImpl for UserService {
         }
     }
 
-    async fn delete_user(&mut self, id: i64) -> anyhow::Result<()> {
+    async fn delete_user(&self, id: i64) -> anyhow::Result<()> {
         let mut data = self.data.lock().await;
         match data.items.remove(&id) {
             None => {
