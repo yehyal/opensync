@@ -34,9 +34,9 @@ pub trait PostService {
     async fn get_all_posts(&self) -> anyhow::Result<Vec<Post>>;
     async fn get_post_by_id(&self, id: i64) -> anyhow::Result<Post>;
     async fn get_post_by_slug(&self, slug: &str) -> anyhow::Result<Post>;
-    async fn create_post(&self, req: CreatePostDTO) -> anyhow::Result<Post>;
-    async fn update_post(&self, req: UpdatePostDTO) -> anyhow::Result<Post>;
-    async fn delete_post(&self, id: i64) -> anyhow::Result<()>;
+    async fn create_post(&mut self, req: CreatePostDTO) -> anyhow::Result<Post>;
+    async fn update_post(&mut self, req: UpdatePostDTO) -> anyhow::Result<Post>;
+    async fn delete_post(&mut self, id: i64) -> anyhow::Result<()>;
 }
 
 impl Default for InMemoryPostService {
@@ -75,7 +75,7 @@ impl PostService for InMemoryPostService {
         anyhow::bail!("Post not found: {}", slug)
     }
 
-    async fn create_post(&self, req: CreatePostDTO) -> anyhow::Result<Post> {
+    async fn create_post(&mut self, req: CreatePostDTO) -> anyhow::Result<Post> {
         let mut data = self.data.lock().await;
         data.counter += 1;
 
@@ -102,7 +102,7 @@ impl PostService for InMemoryPostService {
         }
     }
 
-    async fn update_post(&self, req: UpdatePostDTO) -> anyhow::Result<Post> {
+    async fn update_post(&mut self, req: UpdatePostDTO) -> anyhow::Result<Post> {
         let mut data = self.data.lock().await;
         let post = data
             .items
@@ -118,7 +118,7 @@ impl PostService for InMemoryPostService {
         Ok((*post).clone())
     }
 
-    async fn delete_post(&self, id: i64) -> anyhow::Result<()> {
+    async fn delete_post(&mut self, id: i64) -> anyhow::Result<()> {
         let mut data = self.data.lock().await;
         match data.items.remove(&id) {
             None => {
