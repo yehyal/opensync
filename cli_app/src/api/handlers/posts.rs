@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use axum::{
-    Json,
+    Extension, Json,
     extract::{Path, State},
     http::StatusCode,
 };
@@ -9,7 +9,10 @@ use axum::{
 use crate::{
     api::{
         errors::AppError,
-        response::posts::{ListPostsResponse, SinglePostResponse},
+        response::{
+            TokenClaims,
+            posts::{ListPostsResponse, SinglePostResponse},
+        },
     },
     services::post::{CreatePostDTO, PostService, UpdatePostDTO},
     state::ApplicationState,
@@ -39,6 +42,7 @@ pub async fn get_all(
 }
 
 pub async fn create(
+    Extension(_claims): Extension<TokenClaims>,
     State(state): State<Arc<ApplicationState>>,
     Json(payload): Json<CreatePostDTO>,
 ) -> Result<Json<SinglePostResponse>, AppError> {

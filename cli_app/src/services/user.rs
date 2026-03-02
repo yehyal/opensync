@@ -43,6 +43,7 @@ impl Default for UserService {
 pub trait UserServiceImpl {
     async fn get_all_users(&self) -> anyhow::Result<Vec<User>>;
     async fn get_user_by_id(&self, id: i64) -> anyhow::Result<User>;
+    async fn get_user_by_name(&self, name: &str) -> anyhow::Result<User>;
     async fn create_user(&self, req: CreateUserDTO) -> anyhow::Result<User>;
     async fn update_user(&self, id: i64, req: UpdateUserDTO) -> anyhow::Result<User>;
     async fn delete_user(&self, id: i64) -> anyhow::Result<()>;
@@ -65,6 +66,16 @@ impl UserServiceImpl for UserService {
 
             Some(user) => Ok((*user).clone()),
         }
+    }
+    async fn get_user_by_name(&self, name: &str) -> anyhow::Result<User> {
+        let data = self.data.lock().await;
+
+        for (_id, user) in data.items.iter() {
+            if user.username == name {
+                return Ok(user.clone());
+            }
+        }
+        anyhow::bail!("User not found {}", name)
     }
 
     async fn create_user(&self, req: CreateUserDTO) -> anyhow::Result<User> {

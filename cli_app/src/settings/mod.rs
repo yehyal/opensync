@@ -30,6 +30,8 @@ pub struct Settings {
     pub database: Database,
     #[serde(default)]
     pub logging: Logging,
+    pub token_secret: Option<String>,
+    pub token_timeout_seconds: Option<i64>,
 }
 
 impl Settings {

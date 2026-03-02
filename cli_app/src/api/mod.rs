@@ -4,6 +4,8 @@ use std::sync::Arc;
 
 pub mod errors;
 mod handlers;
+pub mod middleware;
+pub mod request;
 pub mod response;
 mod v1;
 

@@ -3,6 +3,7 @@ use std::{
     net::{IpAddr, Ipv4Addr, SocketAddr},
     sync::Arc,
 };
+use tokio::signal;
 use tower_http::trace::TraceLayer;
 use tracing::{Level, level_filters::LevelFilter};
 use tracing_subscriber::layer::SubscriberExt;
@@ -50,8 +51,34 @@ fn start_tokio(port: u16, settings: &Settings) -> anyhow::Result<()> {
 
             let listener = tokio::net::TcpListener::bind(addr).await?;
 
-            axum::serve(listener, router.into_make_service()).await?;
+            axum::serve(listener, router.into_make_service())
+                .with_graceful_shutdown(shutdown_signal())
+                .await?;
             Ok::<(), anyhow::Error>(())
         });
     Ok(())
+}
+
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler")
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
 }
