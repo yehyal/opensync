@@ -2,6 +2,7 @@
 
 members = [
     "opensync-server",
-    "cli_app"
+    "cli_app",
+    "opensync-core"
 ]
 resolver = "2"

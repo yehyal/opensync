@@ -10,5 +10,5 @@ pub mod response;
 mod v1;
 
 pub fn configure(state: Arc<ApplicationState>) -> Router {
-    Router::new().nest("/v1", v1::configure(state))
+    Router::new().nest("/api/v1", v1::configure(state))
 }

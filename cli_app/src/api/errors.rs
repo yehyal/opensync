@@ -1,4 +1,6 @@
-use axum::{http::StatusCode, response::IntoResponse};
+use axum::response::IntoResponse;
+use http::StatusCode;
+use tokio::io;
 
 pub struct AppError(StatusCode, anyhow::Error);
 
@@ -11,6 +13,24 @@ impl From<(StatusCode, anyhow::Error)> for AppError {
 impl From<anyhow::Error> for AppError {
     fn from(value: anyhow::Error) -> Self {
         Self(StatusCode::INTERNAL_SERVER_ERROR, value)
+    }
+}
+
+impl From<io::Error> for AppError {
+    fn from(value: io::Error) -> Self {
+        Self(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            anyhow::Error::from(value),
+        )
+    }
+}
+
+impl From<http::Error> for AppError {
+    fn from(value: http::Error) -> Self {
+        Self(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            anyhow::Error::from(value),
+        )
     }
 }
 

@@ -25,3 +25,4 @@
 
 //     (StatusCode::OK, Json(response))
 // }
+fn main() {}

@@ -1,18 +1,24 @@
-use std::sync::Arc;
+use std::env::current_dir;
 
-use axum::{extract::State, http::StatusCode};
+use axum::{body::Body, response::Response};
+use http::{StatusCode, header};
+use tokio::fs::File;
+use tokio_util::io;
 
-use crate::state::ApplicationState;
+use crate::api::errors::AppError;
 
-pub async fn test(State(state): State<Arc<ApplicationState>>) -> Result<String, StatusCode> {
-    Ok(format!(
-        "\n Hello World, Configuration from {} \n\n",
-        state
-            .settings
-            .load()
-            .config
-            .location
-            .clone()
-            .unwrap_or("[nowhere]".to_string())
-    ))
+pub async fn test() -> Result<Response, AppError> {
+    print!("DIRECTORY {}", current_dir().unwrap().display());
+    let stream = File::open("big.bin").await?;
+    let metadata = &stream.metadata().await?;
+    let tokio = io::ReaderStream::new(stream);
+    let body = Body::from_stream(tokio);
+
+    let response: Response = Response::builder()
+        .status(StatusCode::OK)
+        .header(header::CONTENT_TYPE, "application/octet-stream")
+        .header(header::CONTENT_LENGTH, metadata.len())
+        .body(body)?;
+
+    Ok(response)
 }
