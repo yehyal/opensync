@@ -8,7 +8,8 @@ use std::sync::Arc;
 
 pub fn configure(state: Arc<ApplicationState>) -> Router {
     Router::new()
-        .route("/test", get(handlers::test::test))
+        .route("/download", get(handlers::test::download))
+        .route("/upload", post(handlers::test::upload))
         .route(
             "/login",
             post(handlers::users::login).with_state(state.clone()),

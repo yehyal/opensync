@@ -1,4 +1,5 @@
 pub mod sync;
+pub mod upload;
 
 // use clap::{ArgMatches, Command};
 

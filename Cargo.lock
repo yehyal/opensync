@@ -331,6 +331,7 @@ dependencies = [
  "clap",
  "config",
  "dotenv",
+ "futures-util",
  "http",
  "jsonwebtoken",
  "serde",

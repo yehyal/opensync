@@ -12,6 +12,7 @@ pub struct Cli {
 #[derive(Subcommand)]
 pub enum Commands {
     Sync(SyncArgs),
+    Upload(SyncArgs),
 }
 
 #[derive(Args)]

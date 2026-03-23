@@ -13,5 +13,6 @@ pub fn main() -> anyhow::Result<()> {
 pub fn run(cli: Cli) -> anyhow::Result<()> {
     match cli.command {
         Commands::Sync(args) => crate::commands::sync::run(args),
+        Commands::Upload(args) => crate::commands::upload::run(args),
     }
 }
