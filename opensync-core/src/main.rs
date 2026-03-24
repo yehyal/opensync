@@ -4,6 +4,7 @@ use crate::cli::{Cli, Commands};
 
 mod cli;
 mod commands;
+mod util;
 
 pub fn main() -> anyhow::Result<()> {
     let args = Cli::parse();
