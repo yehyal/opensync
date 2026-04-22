@@ -8,3 +8,9 @@ anyhow = "1.0.102"
 clap = { version = "4.5.60", features = ["derive"] }
 reqwest = { version = "0.13.2", features = ["blocking"] }
 tar = "0.4"
+clipboard-watcher = "0.2.1"
+tokio = { version = "1.49.0", features = ["full"] }
+futures = "0.3.32"
+env_logger = "0.11.10"
+log = "0.4.29"
+arboard = "3"
