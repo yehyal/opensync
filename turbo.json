@@ -1,0 +1,38 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": [
+    ".oxlintrc.json",
+    ".oxlintignore",
+    ".oxfmtignore"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "dist/**"
+      ]
+    },
+    "lint": {
+      "dependsOn": [
+        "^lint"
+      ]
+    },
+    "lint:fix": {
+      "cache": false
+    },
+    "format": {
+      "cache": false
+    },
+    "format:check": {},
+    "dev": {
+      "cache": false
+    },
+    "rust:build": {
+      "outputs": [
+        "rust/target/**"
+      ]
+    }
+  }
+}

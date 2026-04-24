@@ -1,8 +1,4 @@
 [workspace]
 
-members = [
-    "opensync-server",
-    "cli_app",
-    "opensync-core"
-]
+members = ["apps/desktop", "crates/*"]
 resolver = "2"

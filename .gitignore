@@ -4,3 +4,6 @@ config.json
 test
 big.bin
 uploads
+node_modules/
+.pnpm-store/
+.turbo

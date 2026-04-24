@@ -1,0 +1,14 @@
+dist
+node_modules
+
+# Rust workspace / crates
+crates
+target
+**/*.rs
+**/Cargo.toml
+**/Cargo.lock
+rust-toolchain.toml
+
+# Rust app(s)
+apps/desktop
+
