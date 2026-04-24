@@ -455,6 +455,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "clipboard"
+version = "0.1.0"
+dependencies = [
+ "arboard",
+ "clipboard-watcher",
+ "futures",
+ "reqwest",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "clipboard-watcher"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2315,7 +2327,9 @@ dependencies = [
 name = "opensync-desktop"
 version = "0.1.0"
 dependencies = [
+ "clipboard",
  "tao",
+ "tokio",
  "tray-icon",
 ]
 
@@ -2808,6 +2822,8 @@ dependencies = [
  "rustls",
  "rustls-pki-types",
  "rustls-platform-verifier",
+ "serde",
+ "serde_json",
  "sync_wrapper",
  "tokio",
  "tokio-rustls",

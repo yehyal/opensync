@@ -102,6 +102,12 @@ pub fn main() {
         }
     }));
 
+    let rt = tokio::runtime::Runtime::new().unwrap();
+
+    rt.spawn(async {
+        clipboard::watch().await;
+    });
+
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Poll;
         *control_flow = ControlFlow::Wait;

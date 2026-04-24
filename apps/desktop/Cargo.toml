@@ -6,3 +6,5 @@ edition = "2024"
 [dependencies]
 tao = "0.35.0"
 tray-icon = "0.22.1"
+clipboard = { path = "../../crates/clipboard" }
+tokio = { version = "1.49.0", features = ["full"] }

@@ -2,6 +2,6 @@
   "name": "@repo/desktop",
   "scripts": {
     "build": "cargo build --release",
-    "dev": "cargo run"
+    "dev-test": "cargo run"
   }
 }
