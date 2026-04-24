@@ -1,6 +1,15 @@
+use futures_util::FutureExt;
+use rust_socketio::{
+    Payload, Socket,
+    asynchronous::{Client, ClientBuilder},
+};
 use tao::{
     event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoopBuilder},
+};
+use tokio::{
+    sync::mpsc::{self, Receiver, Sender},
+    time::error::Error,
 };
 use tray_icon::{
     Icon, TrayIconBuilder,
@@ -11,6 +20,11 @@ use tray_icon::{
 enum UserEvent {
     TrayIconEvent(tray_icon::TrayIconEvent),
     MenuEvent(tray_icon::menu::MenuEvent),
+}
+#[derive(Debug)]
+enum AppEvent {
+    Send(String),
+    Receive(String),
 }
 
 pub fn main() {
@@ -103,7 +117,13 @@ pub fn main() {
     }));
 
     let rt = tokio::runtime::Runtime::new().unwrap();
+    // let (tx, rx) = mpsc::channel::<AppEvent>(32);
 
+    rt.spawn(async {
+        if let Err(e) = socket_task().await {
+            eprintln!("socket task exited with error: {e}");
+        }
+    });
     rt.spawn(async {
         clipboard::watch().await;
     });
@@ -149,4 +169,46 @@ pub fn main() {
             _ => (),
         }
     });
+}
+
+async fn socket_task(// mut rx: Receiver<AppEvent>,
+    // tx: Sender<AppEvent>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    // let tx_clone = tx.clone();
+    let _socket = ClientBuilder::new("http://localhost:3000")
+        .on("event.created", move |payload, _| {
+            async move {
+                if let Payload::Text(values) = payload {
+                    println!("socket event.created payload: {values:?}");
+
+                    if let Some(first) = values.first() {
+                        // `Payload::Text` is JSON values. Prefer unquoted string extraction.
+                        let text = first
+                            .as_str()
+                            .map(str::to_owned)
+                            .unwrap_or_else(|| first.to_string());
+
+                        println!("socket event.created text: {text}");
+
+                        if let Err(e) = clipboard::add(&text) {
+                            eprintln!("failed to set clipboard text: {e}");
+                        }
+                    }
+                }
+            }
+            .boxed()
+        })
+        .connect()
+        .await?;
+
+    // Keep the socket client alive; dropping it disconnects.
+    futures_util::future::pending::<()>().await;
+
+    // while let Some(event) = rx.recv().await {
+    //     if let AppEvent::Send(data) = event {
+    //         let _ = socket.emit("event", data).await;
+    //     }
+    // }
+    #[allow(unreachable_code)]
+    Ok(())
 }
