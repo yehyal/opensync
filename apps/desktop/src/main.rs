@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use futures_util::FutureExt;
 use rust_socketio::{
     Payload, Socket,
@@ -95,12 +97,15 @@ pub fn main() {
         rgba.extend_from_slice(&[255, 255, 255, 255]);
     }
 
+    let icon_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("content.ico");
+    println!("icon path: {:?}", icon_path.as_path());
     let _tray_icon = TrayIconBuilder::new()
         .with_menu(Box::new(tray_menu))
         .with_tooltip("system-tray")
-        .with_icon(Icon::from_rgba(rgba, icon_width, icon_height).expect("valid RGBA icon buffer"))
+        .with_icon(Icon::from_path(icon_path, None).expect("ICON FAILED"))
         .build()
         .unwrap();
+    // .with_icon(Icon::from_rgba(rgba, icon_width, icon_height).expect("valid RGBA icon buffer"))
 
     let proxy = event_loop.create_proxy();
     tray_icon::TrayIconEvent::set_event_handler(Some(move |event| {
