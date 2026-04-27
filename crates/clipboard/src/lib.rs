@@ -63,7 +63,7 @@ async fn handle_clipboard_event(
             println!("Received string:\n{v}");
             let hash = sync::hash(v);
             println!("Hashed value: {hash}");
-            if cache.contains(&hash) {
+            if cache.contains_hash(&hash) {
                 return Ok(());
             }
             send_clipboard_event(client, v.to_string()).await?;

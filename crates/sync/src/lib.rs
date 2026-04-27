@@ -1,3 +1,4 @@
+use std::fmt;
 use std::{collections::HashSet, sync::Mutex};
 
 pub struct SuppresionCache {
@@ -17,9 +18,20 @@ impl SuppresionCache {
         hash
     }
 
+    /// Returns true if the given *raw* value is suppressed.
     pub fn contains(&self, value: &str) -> bool {
+        self.contains_value(value)
+    }
+
+    /// Returns true if the given *raw* value is suppressed.
+    pub fn contains_value(&self, value: &str) -> bool {
         let hash = hash(value);
-        self.inner.lock().unwrap().contains(&hash)
+        self.contains_hash(&hash)
+    }
+
+    /// Returns true if the given *hash* is present in the suppression set.
+    pub fn contains_hash(&self, hash: &str) -> bool {
+        self.inner.lock().unwrap().contains(hash)
     }
 
     pub fn remove(&self, hash: &str) {
@@ -30,6 +42,15 @@ impl SuppresionCache {
 impl Default for SuppresionCache {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+impl fmt::Display for SuppresionCache {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.inner.lock() {
+            Ok(guard) => write!(f, "{:?}", &*guard),
+            Err(_) => write!(f, "<SuppresionCache: poisoned lock>"),
+        }
     }
 }
 
