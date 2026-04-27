@@ -1,5 +1,3 @@
-use std::path::{Path, PathBuf};
-
 use image::ImageError;
 use tao::event_loop::EventLoop;
 use tray_icon::{
@@ -35,17 +33,12 @@ impl From<tray_icon::BadIcon> for LoadIconError {
     }
 }
 
-fn icon_from_image_file(path: &Path) -> Result<Icon, LoadIconError> {
-    // Tray icons are rendered by the OS at fairly small sizes. If we pass a huge image
-    // (e.g. 1024x1024), it can get downscaled poorly. Resize to a sensible target first.
-    //
-    // Note: exact rendered size is platform/desktop-environment dependent, but providing
-    // a moderately-sized icon generally looks better than relying on implicit scaling.
-    let target_size: u32 = if cfg!(target_os = "macos") { 200 } else { 48 };
+fn icon_from_image_bytes(bytes: &[u8]) -> Result<Icon, LoadIconError> {
+    // Same resizing strategy as `icon_from_image_file`, but for embedded assets.
+    let target_size: u32 = if cfg!(target_os = "macos") { 32 } else { 48 };
 
-    let dyn_img = image::open(path)?;
+    let dyn_img = image::load_from_memory(bytes)?;
     let rgba = dyn_img
-        // .crop(50, 100, 1024, 1024)
         .resize(
             target_size,
             target_size,
@@ -132,12 +125,10 @@ impl TrayApp {
             rgba.extend_from_slice(&[255, 255, 255, 255]);
         }
 
-        let icon_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("icon.png");
-        let icon = icon_from_image_file(&icon_path).unwrap_or_else(|e| {
-            eprintln!(
-                "failed to load tray icon from {}: {e:?}",
-                icon_path.display()
-            );
+        // Embed the icon at compile-time so it ships with the binary.
+        const ICON_PNG: &[u8] = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/icon.png"));
+        let icon = icon_from_image_bytes(ICON_PNG).unwrap_or_else(|e| {
+            eprintln!("failed to load embedded tray icon: {e:?}");
             Icon::from_rgba(rgba, icon_width, icon_height).expect("fallback RGBA icon buffer")
         });
         let tray_icon = TrayIconBuilder::new()
