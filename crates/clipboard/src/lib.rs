@@ -3,7 +3,8 @@ use clipboard_watcher::{Body, ClipboardEventListener};
 use futures::StreamExt;
 use reqwest::Client;
 use serde::Serialize;
-use std::time::Duration;
+use std::{sync::Arc, time::Duration};
+use sync::SuppresionCache;
 
 pub fn add(text: &str) -> Result<(), arboard::Error> {
     let mut clipboard = Clipboard::new()?;
@@ -11,7 +12,7 @@ pub fn add(text: &str) -> Result<(), arboard::Error> {
     Ok(())
 }
 
-pub async fn watch() {
+pub async fn watch(cache: Arc<SuppresionCache>) {
     let client = Client::new();
     let mut restart_backoff = Duration::from_millis(200);
 
@@ -38,7 +39,8 @@ pub async fn watch() {
         while let Some(result) = stream.next().await {
             match result {
                 Ok(content) => {
-                    if let Err(e) = handle_clipboard_event(content.as_ref(), &client).await {
+                    if let Err(e) = handle_clipboard_event(content.as_ref(), &client, &cache).await
+                    {
                         eprintln!("clipboard watcher: handler error: {e}");
                     }
                 }
@@ -51,10 +53,19 @@ pub async fn watch() {
     }
 }
 
-async fn handle_clipboard_event(content: &Body, client: &Client) -> Result<(), reqwest::Error> {
+async fn handle_clipboard_event(
+    content: &Body,
+    client: &Client,
+    cache: &Arc<SuppresionCache>,
+) -> Result<(), reqwest::Error> {
     match content {
         Body::PlainText(v) => {
             println!("Received string:\n{v}");
+            let hash = sync::hash(v);
+            println!("Hashed value: {hash}");
+            if cache.contains(&hash) {
+                return Ok(());
+            }
             send_clipboard_event(client, v.to_string()).await?;
         }
         Body::RawImage(image) => {
@@ -81,7 +92,8 @@ async fn handle_clipboard_event(content: &Body, client: &Client) -> Result<(), r
 
 async fn send_clipboard_event(client: &Client, content: String) -> Result<(), reqwest::Error> {
     client
-        .post("http://localhost:3000/event")
+        // .post("http://localhost:3000/event")
+        .post("https://hsiu-sociologistic-aliya.ngrok-free.dev/event")
         .json(&ClipboardEvent { text: content })
         .send()
         .await?

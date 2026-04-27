@@ -10,3 +10,5 @@ clipboard = { path = "../../crates/clipboard" }
 tokio = { version = "1.49.0", features = ["full"] }
 rust_socketio = { version = "*", features = ["async"] }
 futures-util = "0.3.32"
+image = { version = "0.25.8", default-features = false, features = ["png", "ico"] }
+sync = { path = "../../crates/sync" }
