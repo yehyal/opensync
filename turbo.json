@@ -1,23 +1,13 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [
-    ".oxlintrc.json",
-    ".oxlintignore",
-    ".oxfmtignore"
-  ],
+  "globalDependencies": [".oxlintrc.json", ".oxlintignore", ".oxfmtignore"],
   "tasks": {
     "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "outputs": [
-        "dist/**"
-      ]
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
     },
     "lint": {
-      "dependsOn": [
-        "^lint"
-      ]
+      "dependsOn": ["^lint"]
     },
     "lint:fix": {
       "cache": false
@@ -30,9 +20,7 @@
       "cache": false
     },
     "rust:build": {
-      "outputs": [
-        "rust/target/**"
-      ]
+      "outputs": ["rust/target/**"]
     }
   }
 }

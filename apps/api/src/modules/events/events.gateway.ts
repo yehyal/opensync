@@ -1,10 +1,17 @@
-import { ConnectedSocket, MessageBody, OnGatewayConnection, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import {
+  ConnectedSocket,
+  MessageBody,
+  OnGatewayConnection,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from "@nestjs/websockets";
+import { Server, Socket } from "socket.io";
 
 @WebSocketGateway({
   cors: {
-    origin: '*',
-  }
+    origin: "*",
+  },
 })
 export class EventsGateway implements OnGatewayConnection {
   private readonly connectedClients: Map<string, Socket> = new Map();
@@ -31,9 +38,8 @@ export class EventsGateway implements OnGatewayConnection {
     const clientId = socket.id;
     this.connectedClients.set(clientId, socket);
     console.log(`Client connected: ${clientId}`);
-    socket.on('disconnect', () => {
+    socket.on("disconnect", () => {
       this.connectedClients.delete(clientId);
     });
   }
-
 }

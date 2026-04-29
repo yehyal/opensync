@@ -1,24 +1,29 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { UpdateUserDto } from "./dto/update-user.dto";
+import { User } from "./entities/user.entity";
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepo: Repository<User>,
-  ) { }
+  ) {}
 
   async create(dto: CreateUserDto): Promise<User> {
     const user = this.usersRepo.create(dto);
     return this.usersRepo.save(user);
   }
 
+  async createWithPassword(dto: CreateUserDto & { passwordHash: string }): Promise<User> {
+    const user = this.usersRepo.create(dto);
+    return this.usersRepo.save(user);
+  }
+
   async findAll(): Promise<User[]> {
-    return this.usersRepo.find({ order: { createdAt: 'DESC' } });
+    return this.usersRepo.find({ order: { createdAt: "DESC" } });
   }
 
   async findOne(id: string): Promise<User> {
@@ -27,6 +32,23 @@ export class UsersService {
       throw new NotFoundException(`User ${id} not found`);
     }
     return user;
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.usersRepo.findOne({ where: { email } });
+  }
+
+  async findByEmailWithPassword(email: string): Promise<User | null> {
+    return this.usersRepo
+      .createQueryBuilder("user")
+      .addSelect("user.passwordHash")
+      .addSelect("user.refreshTokenHash")
+      .where("user.email = :email", { email })
+      .getOne();
+  }
+
+  async setRefreshTokenHash(userId: string, refreshTokenHash: string | null): Promise<void> {
+    await this.usersRepo.update({ id: userId }, { refreshTokenHash });
   }
 
   async update(id: string, dto: UpdateUserDto): Promise<User> {
@@ -40,4 +62,3 @@ export class UsersService {
     await this.usersRepo.remove(user);
   }
 }
-
