@@ -4,6 +4,6 @@ export class AuthResponseDto {
   user: {
     id: string;
     email: string;
-    displayName: string;
+    name: string;
   };
 }

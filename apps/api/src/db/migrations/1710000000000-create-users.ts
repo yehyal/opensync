@@ -11,8 +11,9 @@ export class CreateUsers1710000000000 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "users" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
+        "name" text NOT NULL,
         "email" text NOT NULL,
-        "displayName" text NOT NULL,
+        "password" text NOT NULL,
         "createdAt" timestamptz NOT NULL DEFAULT now(),
         "updatedAt" timestamptz NOT NULL DEFAULT now(),
         CONSTRAINT "PK_users_id" PRIMARY KEY ("id"),

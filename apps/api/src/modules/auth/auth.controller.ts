@@ -5,10 +5,12 @@ import { LoginDto } from "./dto/login.dto";
 import { RefreshDto } from "./dto/refresh.dto";
 import { RegisterDto } from "./dto/register.dto";
 import { JwtAuthGuard } from "./jwt-auth.guard";
+import { Request } from "express";
+import { User } from "../users/entities/user.entity";
 
 @Controller("auth")
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Post("login")
   @HttpCode(200)
@@ -22,23 +24,23 @@ export class AuthController {
     return this.authService.register(dto);
   }
 
-  @Post("refresh")
-  @HttpCode(200)
-  async refresh(@Body() dto: RefreshDto): Promise<AuthResponseDto> {
-    return this.authService.refresh(dto);
-  }
+  // @Post("refresh")
+  // @HttpCode(200)
+  // async refresh(@Body() dto: RefreshDto): Promise<AuthResponseDto> {
+  //   return this.authService.refresh(dto);
+  // }
 
   @UseGuards(JwtAuthGuard)
   @Post("logout")
   @HttpCode(204)
-  async logout(@Req() req: any): Promise<void> {
-    await this.authService.logout(req.user.id);
+  async logout(@Req() req: Request): Promise<void> {
+    await this.authService.logout((req.user as User).id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get("me")
-  async me(@Req() req: any) {
-    const user = req.user;
-    return { id: user.id, email: user.email, displayName: user.displayName };
+  async me(@Req() req: Request) {
+    const user = req.user as User;
+    return { id: user.id, email: user.email, name: user.name };
   }
 }

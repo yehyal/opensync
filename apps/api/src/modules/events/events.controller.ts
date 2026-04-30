@@ -1,11 +1,13 @@
-import { Body, Controller, HttpCode, Post } from "@nestjs/common";
+import { Body, Controller, HttpCode, Post, UseGuards } from "@nestjs/common";
 import { EventsGateway } from "./events.gateway";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 
 @Controller()
 export class EventsController {
   constructor(private readonly eventsGateway: EventsGateway) {}
 
-  @Post(["event", "events"])
+  @UseGuards(JwtAuthGuard)
+  @Post("events")
   @HttpCode(201)
   handleHttpEvent(@Body() event: { text: string }): void {
     // Broadcast to all connected socket.io clients.

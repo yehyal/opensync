@@ -1,5 +1,5 @@
 export class RegisterDto {
   email: string;
-  displayName: string;
+  name: string;
   password: string;
 }
