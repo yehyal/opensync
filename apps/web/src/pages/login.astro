@@ -1,0 +1,24 @@
+---
+import AuthForm from "../components/AuthForm";
+import Layout from "../layouts/Layout.astro";
+import { API_BASE_URL, resolveRedirectUri } from "../lib/auth";
+
+const redirectUri = resolveRedirectUri(Astro.url);
+const signupHref = `/signup?redirect_uri=${encodeURIComponent(redirectUri)}`;
+---
+
+<Layout title="Log in | OpenSync">
+  <main class="shell">
+    <AuthForm
+      client:load
+      mode="login"
+      title="Log in to OpenSync"
+      description="Use the same account the desktop app will trust. After login, this page redirects back to your app."
+      submitLabel="Log in"
+      alternateHref={signupHref}
+      alternateLabel="Need an account? Sign up"
+      apiBaseUrl={API_BASE_URL}
+      redirectUri={redirectUri}
+    />
+  </main>
+</Layout>

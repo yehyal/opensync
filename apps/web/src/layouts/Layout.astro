@@ -1,0 +1,166 @@
+---
+interface Props {
+  title?: string;
+}
+
+const { title = "OpenSync" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    color-scheme: light;
+    --bg: #f3efe7;
+    --panel: #fffdf8;
+    --border: #d9d0c0;
+    --ink: #1c1a17;
+    --muted: #6c665d;
+    --action: #1f5eff;
+    --action-ink: #ffffff;
+    --shadow: rgba(22, 18, 9, 0.08);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+    min-height: 100%;
+    font-family:
+      "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia,
+      serif;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at top left, rgba(31, 94, 255, 0.1), transparent 24rem),
+      linear-gradient(180deg, #f8f4ee 0%, var(--bg) 100%);
+  }
+
+  body {
+    min-height: 100vh;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  .shell {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+  }
+
+  .panel {
+    width: min(100%, 32rem);
+    padding: 2rem;
+    background: color-mix(in srgb, var(--panel) 92%, white);
+    border: 1px solid var(--border);
+    box-shadow: 0 24px 64px var(--shadow);
+  }
+
+  .eyebrow {
+    margin: 0 0 0.75rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  h1 {
+    margin: 0 0 0.75rem;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    line-height: 0.95;
+    font-weight: 600;
+  }
+
+  .copy {
+    margin: 0 0 1.5rem;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--muted);
+  }
+
+  .actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .button,
+  button {
+    appearance: none;
+    border: 0;
+    background: var(--action);
+    color: var(--action-ink);
+    padding: 0.85rem 1.15rem;
+    font: inherit;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .link,
+  .alt a {
+    color: var(--muted);
+    text-decoration-thickness: 1px;
+  }
+
+  .form {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .form label {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .form span {
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+
+  .form input {
+    width: 100%;
+    border: 1px solid var(--border);
+    background: #fff;
+    padding: 0.85rem 0.95rem;
+    font: inherit;
+    color: var(--ink);
+  }
+
+  .status {
+    min-height: 1.5rem;
+    margin: 1rem 0 0;
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+
+  .alt {
+    margin: 1rem 0 0;
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 640px) {
+    .panel {
+      padding: 1.5rem;
+    }
+  }
+</style>

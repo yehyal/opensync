@@ -2,7 +2,6 @@ import { Body, Controller, Get, HttpCode, Post, Req, UseGuards } from "@nestjs/c
 import { AuthService } from "./auth.service";
 import { AuthResponseDto } from "./dto/auth-response.dto";
 import { LoginDto } from "./dto/login.dto";
-import { RefreshDto } from "./dto/refresh.dto";
 import { RegisterDto } from "./dto/register.dto";
 import { JwtAuthGuard } from "./jwt-auth.guard";
 import { Request } from "express";
@@ -10,7 +9,7 @@ import { User } from "../users/entities/user.entity";
 
 @Controller("auth")
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   @Post("login")
   @HttpCode(200)

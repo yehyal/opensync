@@ -1,0 +1,23 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+const loginUrl = "/login";
+const signupUrl = "/signup";
+---
+
+<Layout title="OpenSync">
+  <main class="shell">
+    <section class="panel">
+      <p class="eyebrow">OpenSync</p>
+      <h1>Clipboard sync for your own devices.</h1>
+      <p class="copy">
+        Sign in from the browser, then jump back to the desktop app with a token.
+      </p>
+      <div class="actions">
+        <a class="button" href={loginUrl}>Log in</a>
+        <a class="link" href={signupUrl}>Create account</a>
+      </div>
+    </section>
+  </main>
+</Layout>
+

@@ -12,7 +12,7 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
-  ) { }
+  ) {}
 
   private async issueTokens(user: { id: string; email: string }): Promise<{
     accessToken: string;

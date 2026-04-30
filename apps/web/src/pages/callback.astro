@@ -1,0 +1,26 @@
+---
+import CallbackRedirect from "../components/CallbackRedirect";
+import Layout from "../layouts/Layout.astro";
+import { DEFAULT_REDIRECT_URI, redirectWithTokens } from "../lib/auth";
+
+const accessToken = Astro.url.searchParams.get("access_token");
+const refreshToken = Astro.url.searchParams.get("refresh_token") ?? undefined;
+const redirectUri = Astro.url.searchParams.get("redirect_uri") ?? DEFAULT_REDIRECT_URI;
+const nextUrl =
+  accessToken ? redirectWithTokens(redirectUri, { accessToken, refreshToken }) : null;
+---
+
+<Layout title="Redirecting | OpenSync">
+  <main class="shell">
+    <section class="panel">
+      <p class="eyebrow">OpenSync</p>
+      <h1>Returning to the desktop app</h1>
+      <p class="copy">
+        {nextUrl
+          ? "If the app does not open automatically, use the button below."
+          : "Missing token data. Start the login flow again from the desktop app."}
+      </p>
+      {nextUrl ? <CallbackRedirect client:load nextUrl={nextUrl} /> : <a class="link" href="/login">Back to login</a>}
+    </section>
+  </main>
+</Layout>
