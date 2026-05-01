@@ -10,7 +10,10 @@ export function CallbackRedirect({ nextUrl }: CallbackRedirectProps) {
   }, [nextUrl]);
 
   return (
-    <a className="button" href={nextUrl}>
+    <a
+      className="inline-flex items-center justify-center bg-[#1f5eff] text-white px-5 py-3 no-underline"
+      href={nextUrl}
+    >
       Open the app
     </a>
   );

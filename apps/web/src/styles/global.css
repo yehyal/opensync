@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+@layer base {
+  html,
+  body {
+    @apply m-0 w-full min-h-full text-[#1c1a17];
+    font-family:
+      "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, Georgia,
+      serif;
+  }
+}
+

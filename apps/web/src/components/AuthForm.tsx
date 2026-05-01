@@ -26,13 +26,13 @@ export function AuthForm({
 
   const endpoint = `${apiBaseUrl}/auth/${mode === "login" ? "login" : "register"}`;
 
-  async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
     setStatus("Authenticating...");
 
     const formData = new FormData(event.currentTarget);
-    const payload = Object.fromEntries(formData.entries());
+    const payload = formData;
 
     try {
       const response = await fetch(endpoint, {
@@ -72,44 +72,70 @@ export function AuthForm({
   }
 
   return (
-    <section className="panel">
-      <p className="eyebrow">{mode === "login" ? "Desktop Login" : "Create Account"}</p>
-      <h1>{title}</h1>
-      <p className="copy">{description}</p>
+    <section className="w-full max-w-xl p-8 sm:p-10 bg-[#fffdf8]/95 border border-[#d9d0c0] shadow-[0_24px_64px_rgba(22,18,9,0.08)]">
+      <p className="m-0 mb-3 text-[0.72rem] tracking-[0.18em] uppercase text-[#6c665d]">
+        {mode === "login" ? "Desktop Login" : "Create Account"}
+      </p>
+      <h1 className="m-0 mb-3 text-[clamp(2rem,6vw,3.2rem)] leading-[0.95] font-semibold">
+        {title}
+      </h1>
+      <p className="m-0 mb-6 text-base leading-relaxed text-[#6c665d]">{description}</p>
 
-      <form className="form" onSubmit={handleSubmit}>
+      <form className="grid gap-4" onSubmit={handleSubmit}>
         {mode === "signup" && (
-          <label>
-            <span>Name</span>
-            <input name="name" type="text" autoComplete="name" required />
+          <label className="grid gap-1.5">
+            <span className="text-sm text-[#6c665d]">Name</span>
+            <input
+              name="name"
+              type="text"
+              autoComplete="name"
+              required
+              className="w-full border border-[#d9d0c0] bg-white px-4 py-3 text-[#1c1a17]"
+            />
           </label>
         )}
 
-        <label>
-          <span>Email</span>
-          <input name="email" type="email" autoComplete="email" required />
+        <label className="grid gap-1.5">
+          <span className="text-sm text-[#6c665d]">Email</span>
+          <input
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            className="w-full border border-[#d9d0c0] bg-white px-4 py-3 text-[#1c1a17]"
+          />
         </label>
 
-        <label>
-          <span>Password</span>
+        <label className="grid gap-1.5">
+          <span className="text-sm text-[#6c665d]">Password</span>
           <input
             name="password"
             type="password"
             autoComplete={mode === "login" ? "current-password" : "new-password"}
             required
+            className="w-full border border-[#d9d0c0] bg-white px-4 py-3 text-[#1c1a17]"
           />
         </label>
 
-        <button type="submit" disabled={loading}>
+        <button
+          type="submit"
+          disabled={loading}
+          className="inline-flex items-center justify-center bg-[#1f5eff] text-white px-5 py-3 disabled:opacity-60"
+        >
           {loading ? "Working..." : submitLabel}
         </button>
       </form>
 
-      <p className="status" aria-live="polite">
+      <p className="min-h-6 mt-4 text-[0.95rem] text-[#6c665d]" aria-live="polite">
         {status}
       </p>
-      <p className="alt">
-        <a href={alternateHref}>{alternateLabel}</a>
+      <p className="mt-4 text-[0.95rem]">
+        <a
+          className="text-[#6c665d] underline underline-offset-4 decoration-[#6c665d]/40"
+          href={alternateHref}
+        >
+          {alternateLabel}
+        </a>
       </p>
     </section>
   );
