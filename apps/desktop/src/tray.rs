@@ -7,11 +7,10 @@ use tray_icon::{
 
 use crate::UserEvent;
 
-pub enum TrayMenuAction {
-    Open,
+pub enum TrayAction {
+    None,
+    OpenWindow,
     ToggleLogs(bool),
-    DebugHello,
-    DebugState,
     Quit,
 }
 
@@ -163,33 +162,36 @@ impl TrayApp {
         })
     }
 
-    pub fn handle_tray_event(&self, event: tray_icon::TrayIconEvent) {
-        println!("tray event proxied to event loop: {event:?}");
+    pub fn handle_tray_event(&self, _event: tray_icon::TrayIconEvent) -> TrayAction {
+        TrayAction::None
     }
 
-    pub fn handle_menu_event(&self, event: tray_icon::menu::MenuEvent) -> Option<TrayMenuAction> {
+    pub fn handle_menu_event(&self, event: tray_icon::menu::MenuEvent) -> TrayAction {
         if event.id == self.open_id {
-            return Some(TrayMenuAction::Open);
+            return TrayAction::OpenWindow;
         }
 
         if event.id == self.show_logs_id {
             let new_value = !self.show_logs_item.is_checked();
             self.show_logs_item.set_checked(new_value);
-            return Some(TrayMenuAction::ToggleLogs(new_value));
+            return TrayAction::ToggleLogs(new_value);
         }
 
         if event.id == self.debug_hello_id {
-            return Some(TrayMenuAction::DebugHello);
+            println!("menu action: debug hello");
+            return TrayAction::None;
         }
 
         if event.id == self.debug_state_id {
-            return Some(TrayMenuAction::DebugState);
+            println!("menu action: debug state");
+            return TrayAction::None;
         }
 
         if event.id == self.quit_id {
-            return Some(TrayMenuAction::Quit);
+            return TrayAction::Quit;
         }
 
-        None
+        println!("menu action: unhandled id={}", event.id.0);
+        TrayAction::None
     }
 }
