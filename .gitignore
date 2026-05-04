@@ -7,3 +7,4 @@ uploads
 node_modules/
 .pnpm-store/
 .turbo
+app.db

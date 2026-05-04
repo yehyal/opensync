@@ -12,3 +12,4 @@ rust_socketio = { version = "*", features = ["async"] }
 futures-util = "0.3.32"
 image = { version = "0.25.8", default-features = false, features = ["png", "ico"] }
 sync = { path = "../../crates/sync" }
+storage = { path = "../../crates/storage" }

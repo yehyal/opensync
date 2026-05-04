@@ -18,6 +18,7 @@ pub enum UserEvent {
     MenuEvent(tray_icon::menu::MenuEvent),
 }
 pub fn main() {
+    let _conn = storage::db::setup().expect("Connection issue");
     let event_loop = EventLoopBuilder::<UserEvent>::with_user_event().build();
     // let _window = WindowBuilder::new()
     //     .with_visible(false)
