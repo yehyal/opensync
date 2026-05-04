@@ -52,6 +52,7 @@ export class AuthService {
   async register(dto: RegisterDto): Promise<AuthResponseDto> {
     const existing = await this.usersService.findByEmail(dto.email);
     if (existing) {
+      console.log("test");
       throw new ConflictException("Email already in use");
     }
 

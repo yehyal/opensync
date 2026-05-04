@@ -12,8 +12,12 @@ export class DevicesService {
     private readonly deviceRepo: Repository<Device>,
   ) {}
 
-  async create(createDeviceDto: CreateDeviceDto): Promise<Device> {
-    const device = this.deviceRepo.create(createDeviceDto);
+  async create(userId: string, createDeviceDto: CreateDeviceDto): Promise<Device> {
+    const device = this.deviceRepo.create({
+      userId,
+      deviceName: createDeviceDto.name,
+      platform: createDeviceDto.platform,
+    });
     return this.deviceRepo.save(device);
   }
 

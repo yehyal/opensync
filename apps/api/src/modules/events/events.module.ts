@@ -4,9 +4,11 @@ import { EventsGateway } from "./events.gateway";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { Event } from "./entities/event.entity";
 import { EventsService } from "./events.service";
+import { ConnectionsModule } from "../connections/connections.module";
+import { AuthModule } from "../auth/auth.module";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Event])],
+  imports: [TypeOrmModule.forFeature([Event]), ConnectionsModule, AuthModule],
   controllers: [EventsController],
   providers: [EventsGateway, EventsService],
   exports: [EventsService],

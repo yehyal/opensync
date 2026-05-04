@@ -1,17 +1,21 @@
-import { Body, Controller, HttpCode, Post, UseGuards } from "@nestjs/common";
-import { EventsGateway } from "./events.gateway";
+import { Body, Controller, HttpCode, Post, Req, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { CreateEventDto } from "./dto/create-event.dto";
+import { EventsService } from "./events.service";
+import { Request } from "express";
+import { User } from "../users/entities/user.entity";
 
 @Controller()
 export class EventsController {
-  constructor(private readonly eventsGateway: EventsGateway) {}
+  constructor(private readonly eventsService: EventsService) {}
 
   @UseGuards(JwtAuthGuard)
   @Post("events")
   @HttpCode(201)
-  handleHttpEvent(@Body() event: { text: string }): void {
-    // Broadcast to all connected socket.io clients.
-    console.log(event);
-    this.eventsGateway.broadcast(event.text);
+  async handleHttpEvent(
+    @Body() createEventDto: CreateEventDto,
+    @Req() req: Request & { user: User },
+  ): Promise<void> {
+    await this.eventsService.create(req.user.id, createEventDto);
   }
 }

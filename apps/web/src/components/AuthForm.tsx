@@ -32,7 +32,7 @@ export function AuthForm({
     setStatus("Authenticating...");
 
     const formData = new FormData(event.currentTarget);
-    const payload = formData;
+    const payload = Object.fromEntries(formData.entries());
 
     try {
       const response = await fetch(endpoint, {
