@@ -3,6 +3,8 @@ use std::{sync::Arc, time::Duration};
 use futures_util::FutureExt;
 
 use rust_socketio::{Payload, asynchronous::ClientBuilder};
+use single_instance::SingleInstance;
+use storage::Storage;
 use sync::SuppresionCache;
 use tao::{
     event::Event,
@@ -21,8 +23,14 @@ pub enum UserEvent {
 }
 
 pub fn main() {
+    let instance = SingleInstance::new("opensync").unwrap();
+    if !instance.is_single() {
+        println!("Another instance is already running!");
+        std::process::exit(1);
+    }
     let event_loop = EventLoopBuilder::<UserEvent>::with_user_event().build();
     let mut app_window = AppWindow::new(&event_loop);
+    let storage = Storage::new();
 
     let tray = tray::TrayApp::init(&event_loop).expect("tray init failed");
     let rt = tokio::runtime::Runtime::new().unwrap();

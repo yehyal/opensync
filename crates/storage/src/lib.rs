@@ -1,10 +1,10 @@
-use rusqlite::Connection;
+use crate::db::DB;
 
 pub mod db;
 mod paths;
 
 pub struct Storage {
-    pub db: Connection,
+    pub db: DB,
 }
 
 impl Storage {

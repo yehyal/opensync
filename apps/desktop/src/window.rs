@@ -1,6 +1,6 @@
 use std::time::{Instant, SystemTime};
 
-use egui::{Button, Color32, Context};
+use egui::{Button, Color32, Context, Vec2};
 use egui_glow::Painter;
 use glow::HasContext;
 use glutin::{
@@ -19,9 +19,14 @@ use tao::{
 };
 
 use crate::UserEvent;
+enum AuthState {
+    Waiting,
+    Idle,
+    Auth,
+}
 
 pub struct AppWindow {
-    window: Window,
+    pub window: Window,
     gl: std::sync::Arc<glow::Context>,
     painter: Painter,
     egui_ctx: Context,
@@ -33,6 +38,7 @@ pub struct AppWindow {
     cursor_pos: Option<egui::Pos2>,
     visible: bool,
     needs_redraw: bool,
+    auth_state: AuthState,
 }
 
 impl AppWindow {
@@ -106,12 +112,14 @@ impl AppWindow {
         let gl = std::sync::Arc::new(gl);
         let painter =
             Painter::new(gl.clone(), "", None, false).expect("failed to create egui glow painter");
+        let egui_ctx = Context::default();
+        egui_ctx.set_pixels_per_point(1.25);
 
         Self {
             window,
             gl,
             painter,
-            egui_ctx: Context::default(),
+            egui_ctx,
             surface,
             context,
             last_frame_time: Instant::now(),
@@ -120,6 +128,7 @@ impl AppWindow {
             cursor_pos: None,
             visible: true,
             needs_redraw: true,
+            auth_state: AuthState::Idle,
         }
     }
 
@@ -230,19 +239,43 @@ impl AppWindow {
             ui.heading("OpenSync");
             ui.separator();
 
-            let login = Button::new("test").fill(Color32::RED);
-            if ui.add(login).clicked() {
-                println!("Login clicked");
-            }
+            match self.auth_state {
+                AuthState::Idle => {
+                    let login = Button::new("test")
+                        .fill(Color32::RED)
+                        .min_size(Vec2::new(120_f32, 40_f32));
+                    if ui.add(login).clicked() {
+                        match webbrowser::open("http://localhost:3000/login") {
+                            Ok(_) => println!("Login clicked"),
+                            Err(e) => println!("Failed to open browser: {:?}", e),
+                        }
+                        println!("Login clicked");
+                    }
 
-            if ui.button("Register").clicked() {
-                println!("Register clicked");
-            }
+                    if ui.button("Register").clicked() {
+                        println!("Register clicked");
+                    }
 
-            ui.horizontal(|ui| {
-                ui.label("Status:");
-                ui.label("Connected");
-            });
+                    ui.horizontal(|ui| {
+                        ui.label("Status:");
+                        ui.label("not logged in");
+                    });
+                }
+
+                AuthState::Waiting => {
+                    ui.label("Waiting for authentication...");
+                    ui.add(egui::Spinner::new());
+                }
+
+                AuthState::Auth => {
+                    ui.label("✅ Logged in");
+
+                    ui.horizontal(|ui| {
+                        ui.label("Status:");
+                        ui.label("not logged in");
+                    });
+                }
+            }
         });
 
         let full_output = self.egui_ctx.end_pass();
