@@ -1,4 +1,4 @@
 [workspace]
 
-members = ["apps/desktop", "crates/*"]
+members = ["apps/desktop", "crates/*", "apps/desktop-tauri/src-tauri"]
 resolver = "2"

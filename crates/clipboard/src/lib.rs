@@ -5,6 +5,7 @@ use reqwest::Client;
 use serde::Serialize;
 use std::{sync::Arc, time::Duration};
 use sync::SuppresionCache;
+use tokio::time::sleep;
 
 pub fn add(text: &str) -> Result<(), arboard::Error> {
     let mut clipboard = Clipboard::new()?;
@@ -27,7 +28,7 @@ pub async fn watch(cache: Arc<SuppresionCache>) {
                     "clipboard watcher: failed to spawn listener ({e:?}); retrying in {:?}",
                     restart_backoff
                 );
-                std::thread::sleep(restart_backoff);
+                sleep(restart_backoff).await;
                 restart_backoff = (restart_backoff * 2).min(Duration::from_secs(5));
                 continue;
             }
