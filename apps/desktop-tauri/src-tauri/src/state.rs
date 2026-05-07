@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use storage::db::{self, DB, LoginResponse};
+use storage::db::{self, LoginResponse, DB};
 use sync::SuppresionCache;
 
 pub struct AppState {

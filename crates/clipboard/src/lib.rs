@@ -93,8 +93,8 @@ async fn handle_clipboard_event(
 
 async fn send_clipboard_event(client: &Client, content: String) -> Result<(), reqwest::Error> {
     client
-        // .post("http://localhost:3000/event")
-        .post("https://hsiu-sociologistic-aliya.ngrok-free.dev/event")
+        .post("http://localhost:3000/events")
+        // .post("https://hsiu-sociologistic-aliya.ngrok-free.dev/event")
         .json(&ClipboardEvent { text: content })
         .send()
         .await?

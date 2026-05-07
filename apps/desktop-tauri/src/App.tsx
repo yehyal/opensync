@@ -23,12 +23,12 @@ function App() {
 
   const handleLogin = async () => {
     setAuthState("redirecting");
-    await openUrl("http://localhost:3000/login");
+    await openUrl("http://localhost:4321/login");
   };
 
   const handleRegister = async () => {
     setAuthState("redirecting");
-    await openUrl("http://localhost:3000/signup");
+    await openUrl("http://localhost:4321/register");
   };
 
   useEffect(() => {

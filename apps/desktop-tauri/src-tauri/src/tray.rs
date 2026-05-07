@@ -4,6 +4,8 @@ use tauri::{
     AppHandle, Manager, Runtime,
 };
 
+use log::warn;
+
 const MENU_OPEN: &str = "tray.open";
 const MENU_CLOSE: &str = "tray.close";
 
@@ -73,7 +75,7 @@ fn show_main_window<R: Runtime>(app: &AppHandle<R>) {
         let _ = window.show();
         let _ = window.set_focus();
     } else {
-        eprintln!("tray action requested main window, but no 'main' window exists");
+        warn!("tray action requested main window, but no 'main' window exists");
     }
 }
 
@@ -81,6 +83,6 @@ fn hide_main_window<R: Runtime>(app: &AppHandle<R>) {
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.hide();
     } else {
-        eprintln!("tray action requested hiding main window, but no 'main' window exists");
+        warn!("tray action requested hiding main window, but no 'main' window exists");
     }
 }
