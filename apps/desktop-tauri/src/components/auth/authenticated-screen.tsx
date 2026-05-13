@@ -9,9 +9,7 @@ export function AuthenticatedScreen() {
         </div>
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold text-white">Logged in</h1>
-          <p className="text-sm leading-6 text-stone-300">
-            Your desktop app is authenticated.
-          </p>
+          <p className="text-sm leading-6 text-stone-300">Your desktop app is authenticated.</p>
         </div>
       </div>
     </AuthShell>

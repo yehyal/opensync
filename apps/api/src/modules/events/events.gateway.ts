@@ -41,9 +41,13 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleConnection(socket: Socket): void {
     try {
-      const token =
-        (socket.handshake?.query?.token as string) ||
-        (socket.handshake?.headers?.authorization as string)?.split(" ")[1];
+      const tokenFromQuery = socket.handshake?.query?.token as string | undefined;
+      const tokenFromAuth = socket.handshake?.auth?.token as string | undefined;
+      const tokenFromHeader = (
+        socket.handshake?.headers?.authorization as string | undefined
+      )?.split(" ")[1];
+
+      const token = tokenFromQuery || tokenFromAuth || tokenFromHeader;
 
       if (!token) {
         socket.disconnect();
@@ -52,7 +56,10 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       const payload = this.jwtService.verify(token);
       const userId = payload.sub || payload.id || payload.userId;
-      const deviceId = (socket.handshake?.query?.deviceId as string) || socket.id;
+      const deviceId =
+        (socket.handshake?.query?.deviceId as string | undefined) ||
+        (socket.handshake?.auth?.deviceId as string | undefined) ||
+        socket.id;
 
       if (!userId) {
         socket.disconnect();

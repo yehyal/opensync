@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use storage::db::{self, LoginResponse, DB};
+use storage::db::{self, DB, Session};
 use sync::SuppresionCache;
 
 pub struct AppState {
@@ -17,6 +17,7 @@ pub struct AuthSession {
     pub name: String,
     pub email: String,
     pub token: String,
+    pub device_id: String,
 }
 
 pub struct AuthState {
@@ -74,13 +75,14 @@ impl AuthState {
     }
 }
 
-impl From<LoginResponse> for AuthSession {
-    fn from(value: LoginResponse) -> Self {
+impl From<Session> for AuthSession {
+    fn from(value: Session) -> Self {
         Self {
             user_id: value.user_id,
             name: value.name,
             email: value.email,
             token: value.token,
+            device_id: value.device_id,
         }
     }
 }

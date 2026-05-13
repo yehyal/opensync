@@ -1,7 +1,7 @@
 use arboard::Clipboard;
 use clipboard_watcher::{Body, ClipboardEventListener};
 use futures::StreamExt;
-use reqwest::Client;
+use reqwest::{Client, ClientBuilder, header};
 use serde::Serialize;
 use std::{sync::Arc, time::Duration};
 use sync::SuppresionCache;
@@ -13,8 +13,15 @@ pub fn add(text: &str) -> Result<(), arboard::Error> {
     Ok(())
 }
 
-pub async fn watch(cache: Arc<SuppresionCache>) {
-    let client = Client::new();
+pub async fn watch(cache: Arc<SuppresionCache>, token: String, device_id: String) {
+    let mut headers = header::HeaderMap::new();
+
+    let auth_value = header::HeaderValue::from_str(&format!("Bearer {}", token)).unwrap();
+    headers.insert(header::AUTHORIZATION, auth_value);
+    let client = ClientBuilder::new()
+        .default_headers(headers)
+        .build()
+        .unwrap();
     let mut restart_backoff = Duration::from_millis(200);
 
     loop {
@@ -40,7 +47,8 @@ pub async fn watch(cache: Arc<SuppresionCache>) {
         while let Some(result) = stream.next().await {
             match result {
                 Ok(content) => {
-                    if let Err(e) = handle_clipboard_event(content.as_ref(), &client, &cache).await
+                    if let Err(e) =
+                        handle_clipboard_event(content.as_ref(), &client, &cache, &device_id).await
                     {
                         eprintln!("clipboard watcher: handler error: {e}");
                     }
@@ -58,6 +66,7 @@ async fn handle_clipboard_event(
     content: &Body,
     client: &Client,
     cache: &Arc<SuppresionCache>,
+    device_id: &str,
 ) -> Result<(), reqwest::Error> {
     match content {
         Body::PlainText(v) => {
@@ -67,7 +76,12 @@ async fn handle_clipboard_event(
             if cache.contains_hash(&hash) {
                 return Ok(());
             }
-            send_clipboard_event(client, v.to_string()).await?;
+            let event = ClipboardEvent {
+                hash,
+                content: v.to_string(),
+                device_id: device_id.to_string(),
+            };
+            send_clipboard_event(client, event).await?;
         }
         Body::RawImage(image) => {
             println!("Received raw image");
@@ -91,11 +105,14 @@ async fn handle_clipboard_event(
     Ok(())
 }
 
-async fn send_clipboard_event(client: &Client, content: String) -> Result<(), reqwest::Error> {
+async fn send_clipboard_event(
+    client: &Client,
+    event: ClipboardEvent,
+) -> Result<(), reqwest::Error> {
     client
         .post("http://localhost:3000/events")
         // .post("https://hsiu-sociologistic-aliya.ngrok-free.dev/event")
-        .json(&ClipboardEvent { text: content })
+        .json(&event)
         .send()
         .await?
         .error_for_status()?;
@@ -104,6 +121,9 @@ async fn send_clipboard_event(client: &Client, content: String) -> Result<(), re
 }
 
 #[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
 struct ClipboardEvent {
-    pub text: String,
+    pub device_id: String,
+    pub content: String,
+    pub hash: String,
 }

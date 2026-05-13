@@ -7,10 +7,7 @@ type AuthLandingScreenProps = {
   onRegister: () => Promise<void>;
 };
 
-export function AuthLandingScreen({
-  onLogin,
-  onRegister,
-}: AuthLandingScreenProps) {
+export function AuthLandingScreen({ onLogin, onRegister }: AuthLandingScreenProps) {
   return (
     <AuthShell>
       <div className="space-y-6">

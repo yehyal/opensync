@@ -1,4 +1,7 @@
-use std::sync::{atomic::{AtomicBool, Ordering}, Mutex};
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Mutex,
+};
 
 use log::{info, warn};
 use tauri::{async_runtime::spawn, AppHandle, Emitter, Manager, Runtime};
@@ -37,7 +40,8 @@ impl ServicesState {
 
     /// Ensures background services reflect the current authentication state.
     pub fn sync_with_auth<R: Runtime>(&self, app: &AppHandle<R>) {
-        let should_run = self.enabled.load(Ordering::SeqCst) && app.state::<AuthState>().is_logged_in();
+        let should_run =
+            self.enabled.load(Ordering::SeqCst) && app.state::<AuthState>().is_logged_in();
         if should_run {
             self.start(app);
         } else {

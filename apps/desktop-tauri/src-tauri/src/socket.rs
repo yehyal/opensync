@@ -33,14 +33,20 @@ async fn socket_task<R: Runtime>(
         .state::<AuthState>()
         .session()
         .ok_or("socket service requires an authenticated session")?;
+    let token = session.token.clone();
     // let _socket = ClientBuilder::new("https://hsiu-sociologistic-aliya.ngrok-free.dev")
+    info!("Socket connection starting");
     let socket = ClientBuilder::new("http://localhost:3000")
         .auth(json!({
-            "token": session.token,
+            "token": token.clone(),
             "userId": session.user_id,
             "email": session.email,
             "name": session.name,
+            "device_id": session.device_id
         }))
+        // Server-side may read token from either `handshake.auth` or headers/query.
+        // Send it as a header too to be compatible with other gateways/middlewares.
+        .opening_header("authorization", format!("Bearer {}", token))
         .on("event.created", move |payload, _| {
             let cache = cache.clone();
             async move {
@@ -75,7 +81,7 @@ async fn socket_task<R: Runtime>(
         })
         .connect()
         .await?;
-
+    info!("Socket connected!");
     tokio::select! {
         _ = futures_util::future::pending::<()>() => {},
         _ = shutdown.recv() => {

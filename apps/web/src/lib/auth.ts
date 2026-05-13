@@ -1,7 +1,7 @@
 export const API_BASE_URL = import.meta.env.PUBLIC_API_BASE_URL ?? "http://localhost:3000";
 
 export const DEFAULT_REDIRECT_URI =
-  import.meta.env.PUBLIC_DESKTOP_REDIRECT_URI ?? "opensync://auth/callback";
+  import.meta.env.PUBLIC_DESKTOP_REDIRECT_URI ?? "opensync://callback";
 
 export function resolveRedirectUri(currentUrl: URL): string {
   return currentUrl.searchParams.get("redirect_uri") ?? DEFAULT_REDIRECT_URI;

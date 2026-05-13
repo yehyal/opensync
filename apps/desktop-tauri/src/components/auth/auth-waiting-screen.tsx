@@ -5,9 +5,7 @@ type AuthWaitingScreenProps = {
   isRedirecting: boolean;
 };
 
-export function AuthWaitingScreen({
-  isRedirecting,
-}: AuthWaitingScreenProps) {
+export function AuthWaitingScreen({ isRedirecting }: AuthWaitingScreenProps) {
   return (
     <AuthShell>
       <div className="space-y-6 text-center">

@@ -4,6 +4,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 import { AuthenticatedScreen } from "./components/auth/authenticated-screen";
 import { AuthLandingScreen } from "./components/auth/auth-landing-screen";
 import { AuthWaitingScreen } from "./components/auth/auth-waiting-screen";
+import { listen } from "@tauri-apps/api/event";
 
 type AuthState = "checking" | "guest" | "redirecting" | "authenticated";
 
@@ -23,51 +24,34 @@ function App() {
 
   const handleLogin = async () => {
     setAuthState("redirecting");
-    await openUrl("http://localhost:4321/login");
+    await openUrl("http://localhost:4321/login?redirect_uri=opensync://callback");
   };
 
   const handleRegister = async () => {
     setAuthState("redirecting");
-    await openUrl("http://localhost:4321/register");
+    await openUrl("http://localhost:4321/register?redirect_uri=opensync://callback");
   };
+
+  const eventListener = async () => {
+    const unlistenHandle = await listen("auth://changed", (event) => {
+      console.log(event);
+      setAuthState("authenticated");
+    });
+    return unlistenHandle;
+  };
+  eventListener();
 
   useEffect(() => {
     void checkAuthState();
   }, []);
 
-  useEffect(() => {
-    if (authState !== "redirecting") {
-      return;
-    }
-
-    const intervalId = window.setInterval(async () => {
-      try {
-        const isAuthenticated = await invoke<boolean>("is_authenticated");
-
-        if (isAuthenticated) {
-          setAuthState("authenticated");
-        }
-      } catch (error) {
-        console.error("Failed to refresh authentication state", error);
-      }
-    }, 2000);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, [authState]);
 
   if (authState === "checking" || authState === "redirecting") {
     return <AuthWaitingScreen isRedirecting={authState === "redirecting"} />;
   }
 
   if (authState === "guest") {
-    return (
-      <AuthLandingScreen
-        onLogin={handleLogin}
-        onRegister={handleRegister}
-      />
-    );
+    return <AuthLandingScreen onLogin={handleLogin} onRegister={handleRegister} />;
   }
 
   return <AuthenticatedScreen />;

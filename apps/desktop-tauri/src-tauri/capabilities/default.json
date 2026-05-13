@@ -15,6 +15,7 @@
         }
       ]
     },
-    "log:default"
+    "log:default",
+    "http:default"
   ]
 }

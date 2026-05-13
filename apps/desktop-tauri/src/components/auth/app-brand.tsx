@@ -11,12 +11,9 @@ export function AppBrand() {
           Desktop Client
         </p>
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-white">
-            OpenSync
-          </h1>
+          <h1 className="text-3xl font-semibold tracking-tight text-white">OpenSync</h1>
           <p className="mt-2 text-sm leading-6 text-stone-300">
-            Sign in from your browser to connect the desktop app to your
-            workspace.
+            Sign in from your browser to connect the desktop app to your workspace.
           </p>
         </div>
       </div>

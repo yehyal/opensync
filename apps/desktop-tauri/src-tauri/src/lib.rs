@@ -3,9 +3,13 @@ mod services;
 mod socket;
 mod state;
 mod tray;
-use storage::db::LoginResponse;
+use serde::Deserialize;
+use serde_json::json;
+use storage::db::{DeviceRegistration, LoginResponse};
+use tauri::async_runtime::spawn;
 use tauri::{Emitter, Manager, State};
 use tauri_plugin_deep_link::DeepLinkExt;
+use tauri_plugin_http::reqwest;
 use url::Url;
 
 use log::{error, info, warn};
@@ -13,6 +17,8 @@ use std::collections::HashMap;
 
 use crate::services::ServicesState;
 use crate::state::{AppState, AuthState};
+
+const API_BASE_URL: &str = "http://localhost:3000";
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -166,9 +172,9 @@ fn handle_deep_link_url<R: tauri::Runtime>(app: &tauri::AppHandle<R>, url: Url) 
     let binding = app.state::<AppState>();
     let db = binding.db();
     if let Err(error) = db.lock().unwrap().insert(LoginResponse {
-        user_id: args.user_id,
+        user_id: args.user_id.clone(),
         name: "".to_string(),
-        token: args.token,
+        token: args.token.clone(),
         email: "".to_string(),
     }) {
         error!("DB insert error while handling deep link: {error}");
@@ -190,6 +196,105 @@ fn handle_deep_link_url<R: tauri::Runtime>(app: &tauri::AppHandle<R>, url: Url) 
         let _ = window.show();
         let _ = window.set_focus();
     }
+    // Register this device with the server once we have a session.
+    let app_handle = app.clone();
+    let token = args.token;
+    let user_id = args.user_id;
+    spawn(async move {
+        if user_id.is_empty() {
+            warn!("device registration skipped: missing user_id");
+            return;
+        }
+
+        if let Err(err) = register_device_if_needed(app_handle, token, user_id).await {
+            warn!("device registration failed: {err}");
+        }
+    });
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct DeviceCreateResponse {
+    device_id: Option<String>,
+    device_name: Option<String>,
+    platform: Option<String>,
+}
+
+async fn register_device_if_needed<R: tauri::Runtime>(
+    app: tauri::AppHandle<R>,
+    token: String,
+    user_id: String,
+) -> Result<(), String> {
+    let device_name = whoami::fallible::hostname().unwrap_or_else(|_| "unknown".to_string());
+    let platform = format!("{} {}", std::env::consts::OS, std::env::consts::ARCH);
+
+    // Avoid creating duplicates if the user logs out and logs back in.
+    {
+        let state = app.state::<AppState>();
+        let db = state
+            .db()
+            .lock()
+            .map_err(|_| "db mutex poisoned".to_string())?;
+        match db.get_device_for_user(&user_id) {
+            Ok(Some(existing)) => {
+                info!(
+                    "device already registered for user_id={}: device_id={}",
+                    existing.user_id, existing.device_id
+                );
+                return Ok(());
+            }
+            Ok(None) => {}
+            Err(err) => return Err(format!("db error checking existing device: {err}")),
+        };
+    }
+
+    let client = reqwest::Client::new();
+    let url = format!("{API_BASE_URL}/devices");
+    let res = client
+        .post(url)
+        .bearer_auth(token)
+        .json(&json!({
+          "name": device_name,
+          "platform": platform,
+        }))
+        .send()
+        .await
+        .map_err(|e| format!("request failed: {e}"))?;
+
+    if !res.status().is_success() {
+        let status = res.status();
+        let body = res.text().await.unwrap_or_default();
+        return Err(format!("server returned {status}: {body}"));
+    }
+
+    let body: DeviceCreateResponse = res
+        .json()
+        .await
+        .map_err(|e| format!("failed to parse response json: {e}"))?;
+
+    let device_id = body
+        .device_id
+        .ok_or_else(|| "response missing device_id".to_string())?;
+
+    let saved = DeviceRegistration {
+        user_id,
+        device_id,
+        device_name: body.device_name.unwrap_or_else(|| {
+            whoami::fallible::hostname().unwrap_or_else(|_| "unknown".to_string())
+        }),
+        platform: body
+            .platform
+            .unwrap_or_else(|| format!("{} {}", std::env::consts::OS, std::env::consts::ARCH)),
+    };
+
+    let state = app.state::<AppState>();
+    let db = state.db();
+    db.lock()
+        .map_err(|_| "db mutex poisoned".to_string())?
+        .upsert_device_for_user(saved)
+        .map_err(|e| format!("db error saving device registration: {e}"))?;
+
+    Ok(())
 }
 
 #[tauri::command]

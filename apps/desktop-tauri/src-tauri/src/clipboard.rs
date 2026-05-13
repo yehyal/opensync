@@ -15,8 +15,9 @@ pub fn start<R: Runtime>(
         }
 
         let cache = app.state::<CacheState>().cache();
+        let session = app.state::<AuthState>().session().unwrap();
         tokio::select! {
-            _ = clipboard::watch(cache) => {},
+            _ = clipboard::watch(cache, session.token, session.device_id) => {},
             _ = shutdown.recv() => {
                 info!("clipboard service shutdown requested");
             }

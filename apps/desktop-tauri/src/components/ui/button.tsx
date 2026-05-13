@@ -9,8 +9,7 @@ const buttonVariants = cva(
       variant: {
         default:
           "bg-emerald-400 text-slate-950 shadow-[0_14px_40px_rgba(74,222,128,0.25)] hover:bg-emerald-300",
-        secondary:
-          "bg-white/8 text-stone-100 ring-1 ring-white/15 hover:bg-white/12",
+        secondary: "bg-white/8 text-stone-100 ring-1 ring-white/15 hover:bg-white/12",
       },
       size: {
         default: "h-11 px-5",
@@ -24,14 +23,8 @@ const buttonVariants = cva(
   },
 );
 
-type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
-  VariantProps<typeof buttonVariants>;
+type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<typeof buttonVariants>;
 
 export function Button({ className, variant, size, ...props }: ButtonProps) {
-  return (
-    <button
-      className={cn(buttonVariants({ variant, size }), className)}
-      {...props}
-    />
-  );
+  return <button className={cn(buttonVariants({ variant, size }), className)} {...props} />;
 }

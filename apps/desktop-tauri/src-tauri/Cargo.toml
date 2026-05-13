@@ -1,5 +1,5 @@
 [package]
-name = "opensync-desktop"
+name = "Opensync"
 version = "0.1.0"
 description = "A Tauri App"
 authors = ["you"]
@@ -32,6 +32,8 @@ tauri-plugin-log = "2"
 tauri-plugin-deep-link = "2"
 log = "0.4"
 url = "2"
+tauri-plugin-http = { version = "2", features = ["json"] }
+whoami = "1.6.1"
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }

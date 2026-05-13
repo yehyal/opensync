@@ -58,9 +58,10 @@ export function AuthForm({
 
       const target = new URL(redirectUri);
       target.searchParams.set("access_token", data.accessToken);
-      if (data.refreshToken) {
-        target.searchParams.set("refresh_token", data.refreshToken);
-      }
+      // if (data.refreshToken) {
+      //   target.searchParams.set("refresh_token", data.refreshToken);
+      // }
+      target.searchParams.set("user_id", data.user.id);
       console.log(redirectUri);
       setStatus("Authenticated. Redirecting back to the app...");
       window.location.href = target.toString();
