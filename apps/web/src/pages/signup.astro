@@ -1,4 +1,5 @@
 ---
+import AuthPageShell from "../components/AuthPageShell.astro";
 import AuthForm from "../components/AuthForm";
 import Layout from "../layouts/Layout.astro";
 import { API_BASE_URL, resolveRedirectUri } from "../lib/auth";
@@ -7,18 +8,25 @@ const redirectUri = resolveRedirectUri(Astro.url);
 const loginHref = `/login?redirect_uri=${encodeURIComponent(redirectUri)}`;
 ---
 
-<Layout title="Sign up | OpenSync">
-  <main class="min-h-screen grid place-items-center px-8 py-10 bg-[radial-gradient(circle_at_top_left,rgba(31,94,255,0.10),transparent_24rem),linear-gradient(180deg,#f8f4ee_0%,#f3efe7_100%)]">
+<Layout
+  title="Sign up | OpenSync"
+  description="Create a simple OpenSync account, then hand the session back to the desktop app."
+>
+  <AuthPageShell
+    title="Create a lightweight account, then get back to the app."
+    description="OpenSync starts small on purpose. Account creation is intentionally minimal so the desktop handoff stays clear and fast."
+    activeStep="account"
+  >
     <AuthForm
       client:load
       mode="signup"
       title="Create your OpenSync account"
-      description="Minimal account creation for now: name, email, password, then redirect back to the desktop app."
+      description="Name, email, password, then the browser hands the session back to your desktop app."
       submitLabel="Create account"
       alternateHref={loginHref}
-      alternateLabel="Already have an account? Log in"
+      alternateLabel="Log in instead"
       apiBaseUrl={API_BASE_URL}
       redirectUri={redirectUri}
     />
-  </main>
+  </AuthPageShell>
 </Layout>

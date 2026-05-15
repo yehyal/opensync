@@ -1,22 +1,186 @@
 ---
+import RepoBadge from "../components/RepoBadge";
 import Layout from "../layouts/Layout.astro";
+import { REPO_SLUG, REPO_URL, SITE_NAME } from "../lib/site";
 
 const loginUrl = "/login";
 const signupUrl = "/signup";
 ---
 
-<Layout title="OpenSync">
-  <main class="min-h-screen grid place-items-center px-8 py-10 bg-[radial-gradient(circle_at_top_left,rgba(31,94,255,0.10),transparent_24rem),linear-gradient(180deg,#f8f4ee_0%,#f3efe7_100%)]">
-    <section class="w-full max-w-xl p-8 sm:p-10 bg-[#fffdf8]/95 border border-[#d9d0c0] shadow-[0_24px_64px_rgba(22,18,9,0.08)]">
-      <p class="m-0 mb-3 text-[0.72rem] tracking-[0.18em] uppercase text-[#6c665d]">OpenSync</p>
-      <h1 class="m-0 mb-3 text-[clamp(2rem,6vw,3.2rem)] leading-[0.95] font-semibold">Clipboard sync for your own devices.</h1>
-      <p class="m-0 mb-6 text-base leading-relaxed text-[#6c665d]">
-        Sign in from the browser, then jump back to the desktop app with a token.
-      </p>
-      <div class="flex gap-4 items-center flex-wrap">
-        <a class="inline-flex items-center justify-center bg-[#1f5eff] text-white px-5 py-3 no-underline" href={loginUrl}>Log in</a>
-        <a class="text-[#6c665d] underline underline-offset-4 decoration-[#6c665d]/40" href={signupUrl}>Create account</a>
-      </div>
-    </section>
+<Layout
+  title={`${SITE_NAME} | Open source sync, still taking shape`}
+  description="OpenSync is a work-in-progress open source project for keeping the content you need available across your devices."
+>
+  <main class="landing-main">
+    <div class="page-shell">
+      <header class="landing-header">
+        <a class="brand-lockup" href="/">
+          <span class="brand-lockup__mark">OS</span>
+          <span class="brand-lockup__text">{SITE_NAME}</span>
+        </a>
+
+        <div class="landing-header__actions">
+          <RepoBadge client:load repo={REPO_SLUG} href={REPO_URL} />
+          <a class="button button--text" href={loginUrl}>Log in</a>
+        </div>
+      </header>
+
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero__copy panel panel--soft">
+          <p class="section-kicker">Open source sync in progress</p>
+          <h1 id="hero-title" class="hero__title">Keep the useful parts of your day within reach.</h1>
+          <p class="hero__lede">
+            OpenSync starts with clipboard syncing between your own devices, then grows toward a
+            broader way to keep files and other content close at hand. The idea is simple on
+            purpose: fewer steps, less ceremony, and no cloud-suite heaviness.
+          </p>
+
+          <div class="hero__actions">
+            <a class="button button--primary" href={loginUrl}>Try the auth flow</a>
+            <a class="button button--ghost" href={signupUrl}>Create an account</a>
+          </div>
+
+          <div class="hero__meta" aria-label="Project status">
+            <span>Now: clipboard sync</span>
+            <span>Next: files, shared content, calmer handoffs</span>
+          </div>
+        </div>
+
+        <div class="hero__surface panel panel--soft">
+          <div class="sync-orbit" aria-hidden="true">
+            <div class="sync-orbit__ring"></div>
+            <div class="sync-orbit__ring sync-orbit__ring--inner"></div>
+            <div class="sync-orbit__core">
+              <div>
+                <strong>OpenSync</strong>
+                <span>Your content, ready when you move.</span>
+              </div>
+            </div>
+
+            <div class="sync-chip sync-chip--clipboard">
+              Clipboard
+              <span>shipping now</span>
+            </div>
+            <div class="sync-chip sync-chip--files">
+              Files
+              <span>coming later</span>
+            </div>
+            <div class="sync-chip sync-chip--share">
+              Sharing
+              <span>still forming</span>
+            </div>
+          </div>
+
+          <div class="hero__note">
+            <p>
+              This site is an introduction, not a sales funnel. OpenSync is still WIP, still open,
+              and still focused on proving a calmer sync experience before anything else.
+            </p>
+            <ul>
+              <li>No pricing sections.</li>
+              <li>No inflated product claims.</li>
+              <li>Just the shape of the project as it becomes real.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="landing-section" aria-labelledby="what-exists-title">
+        <div class="landing-section__intro">
+          <p class="section-kicker">What exists now</p>
+          <h2 id="what-exists-title" class="landing-section__title">A simpler handoff between devices.</h2>
+          <p class="landing-section__description">
+            The current build is intentionally narrow. It focuses on authenticating once, returning
+            to the desktop app cleanly, and proving that sync can feel immediate instead of
+            operational.
+          </p>
+        </div>
+
+        <div class="landing-stack">
+          <article class="landing-item panel panel--elevated">
+            <div class="landing-item__index">01</div>
+            <div>
+              <h3 class="landing-item__title">Browser to desktop without friction</h3>
+              <p class="landing-item__body">
+                The web flow only exists to complete account actions and send you back to the app.
+                It should feel like a light bridge, not a separate product.
+              </p>
+            </div>
+          </article>
+
+          <article class="landing-item panel panel--elevated">
+            <div class="landing-item__index">02</div>
+            <div>
+              <h3 class="landing-item__title">Calm UI, even for technical users</h3>
+              <p class="landing-item__body">
+                The tone is technically fluent, but the interaction model stays soft. Clear forms,
+                crisp buttons, and minimal explanation matter more than feature theater.
+              </p>
+            </div>
+          </article>
+
+          <article class="landing-item panel panel--elevated">
+            <div class="landing-item__index">03</div>
+            <div>
+              <h3 class="landing-item__title">WIP by design</h3>
+              <p class="landing-item__body">
+                OpenSync is still finding its final shape. The landing page should say that plainly,
+                while still making the project feel serious and worth following.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="landing-section" aria-labelledby="where-next-title">
+        <div class="landing-section__intro">
+          <p class="section-kicker">Where it can go</p>
+          <h2 id="where-next-title" class="landing-section__title">The project is bigger than clipboard sync.</h2>
+          <p class="landing-section__description">
+            Clipboard sync is the first useful slice because it proves the core idea quickly. The
+            broader theme is continuity: files, notes, and other content should feel present
+            wherever you pick up work next.
+          </p>
+        </div>
+
+        <div class="landing-callout panel panel--soft">
+          <div class="landing-callout__grid">
+            <div class="landing-callout__cell">
+              <strong>Today</strong>
+              <p>Authenticated clipboard sync for your own devices, with the web handling light account flow.</p>
+            </div>
+            <div class="landing-callout__cell">
+              <strong>Later</strong>
+              <p>More sync surfaces, starting with files and the ability to move useful content with less effort.</p>
+            </div>
+            <div class="landing-callout__cell">
+              <strong>Eventually</strong>
+              <p>Hosted infrastructure where it makes sense, without losing the clarity or calm that makes the project interesting.</p>
+            </div>
+            <div class="landing-callout__cell">
+              <strong>Always</strong>
+              <p>A simple UI and direct interactions should remain the differentiator, even as the sync surface grows.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="landing-open-source panel panel--soft" aria-labelledby="oss-title">
+        <div>
+          <p class="section-kicker">Open source right now</p>
+          <h2 id="oss-title" class="landing-section__title">Follow the work as it becomes a real tool.</h2>
+          <p>
+            The repo is the best place to see what is shipping, what is still rough, and where the
+            next pieces are headed. If the premise resonates, star it, inspect the code, or use the
+            auth flow as a preview of the current handoff experience.
+          </p>
+        </div>
+
+        <div class="landing-header__actions">
+          <RepoBadge client:load repo={REPO_SLUG} href={REPO_URL} showName />
+          <a class="button button--primary" href={loginUrl}>Open auth flow</a>
+        </div>
+      </section>
+    </div>
   </main>
 </Layout>

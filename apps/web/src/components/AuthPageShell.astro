@@ -1,0 +1,80 @@
+---
+import RepoBadge from "./RepoBadge";
+import { REPO_SLUG, REPO_URL, SITE_NAME } from "../lib/site";
+
+interface Props {
+  title: string;
+  description: string;
+  eyebrow?: string;
+  activeStep: "account" | "return";
+}
+
+const {
+  title,
+  description,
+  eyebrow = "Desktop handoff",
+  activeStep,
+} = Astro.props;
+
+const steps = [
+  {
+    key: "account",
+    title: "Create or use your account",
+    detail: "Keep the browser step simple so the desktop app can trust the session.",
+  },
+  {
+    key: "return",
+    title: "Return to the app",
+    detail: "Once the session is ready, OpenSync should reopen automatically.",
+  },
+];
+---
+
+<main class="auth-page">
+  <section class="auth-page__context panel panel--soft">
+    <a class="brand-lockup" href="/">
+      <span class="brand-lockup__mark">OS</span>
+      <span class="brand-lockup__text">{SITE_NAME}</span>
+    </a>
+
+    <div class="auth-page__intro">
+      <p class="section-kicker">{eyebrow}</p>
+      <h1 class="auth-page__title">{title}</h1>
+      <p class="auth-page__description">{description}</p>
+    </div>
+
+    <ol class="auth-steps" aria-label="Authentication flow">
+      {
+        steps.map((step, index) => {
+          const isActive = step.key === activeStep;
+          const isComplete = activeStep === "return" && step.key === "account";
+
+          return (
+            <li class:list={["auth-steps__item", isActive && "is-active", isComplete && "is-complete"]}>
+              <span class="auth-steps__index">0{index + 1}</span>
+              <div>
+                <p class="auth-steps__title">{step.title}</p>
+                <p class="auth-steps__detail">{step.detail}</p>
+              </div>
+            </li>
+          );
+        })
+      }
+    </ol>
+
+    <div class="auth-page__footer">
+      <p class="auth-page__note">
+        Open source now, hosted infrastructure later. The core promise stays the same: your
+        content should be where you need it.
+      </p>
+      <div class="auth-page__actions">
+        <a class="button button--ghost" href="/">Back to site</a>
+        <RepoBadge client:load repo={REPO_SLUG} href={REPO_URL} showName />
+      </div>
+    </div>
+  </section>
+
+  <section class="auth-page__form panel panel--elevated">
+    <slot />
+  </section>
+</main>

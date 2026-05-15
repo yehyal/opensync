@@ -11,7 +11,7 @@ export function CallbackRedirect({ nextUrl }: CallbackRedirectProps) {
 
   return (
     <a
-      className="inline-flex items-center justify-center bg-[#1f5eff] text-white px-5 py-3 no-underline"
+      className="button button--primary auth-callback-action"
       href={nextUrl}
     >
       Open the app

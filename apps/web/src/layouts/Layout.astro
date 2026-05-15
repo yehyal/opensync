@@ -3,10 +3,14 @@ import "../styles/global.css";
 
 interface Props {
   title?: string;
+  description?: string;
 }
 
 
-const { title = "OpenSync" } = Astro.props;
+const {
+  title = "OpenSync",
+  description = "Open source sync for the content you need close at hand.",
+} = Astro.props;
 ---
 
 <!doctype html>
@@ -16,7 +20,15 @@ const { title = "OpenSync" } = Astro.props;
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Spectral:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#f8f4ee" />
     <title>{title}</title>
   </head>
   <body>

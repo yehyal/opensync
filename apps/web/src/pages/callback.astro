@@ -1,4 +1,5 @@
 ---
+import AuthPageShell from "../components/AuthPageShell.astro";
 import CallbackRedirect from "../components/CallbackRedirect";
 import Layout from "../layouts/Layout.astro";
 import { DEFAULT_REDIRECT_URI, redirectWithTokens } from "../lib/auth";
@@ -10,17 +11,40 @@ const nextUrl =
   accessToken ? redirectWithTokens(redirectUri, { accessToken, refreshToken }) : null;
 ---
 
-<Layout title="Redirecting | OpenSync">
-  <main class="min-h-screen grid place-items-center px-8 py-10 bg-[radial-gradient(circle_at_top_left,rgba(31,94,255,0.10),transparent_24rem),linear-gradient(180deg,#f8f4ee_0%,#f3efe7_100%)]">
-    <section class="w-full max-w-xl p-8 sm:p-10 bg-[#fffdf8]/95 border border-[#d9d0c0] shadow-[0_24px_64px_rgba(22,18,9,0.08)]">
-      <p class="m-0 mb-3 text-[0.72rem] tracking-[0.18em] uppercase text-[#6c665d]">OpenSync</p>
-      <h1 class="m-0 mb-3 text-[clamp(2rem,6vw,3.2rem)] leading-[0.95] font-semibold">Returning to the desktop app</h1>
-      <p class="m-0 mb-6 text-base leading-relaxed text-[#6c665d]">
-        {nextUrl
-          ? "If the app does not open automatically, use the button below."
-          : "Missing token data. Start the login flow again from the desktop app."}
-      </p>
-      {nextUrl ? <CallbackRedirect client:load nextUrl={nextUrl} /> : <a class="text-[#6c665d] underline underline-offset-4 decoration-[#6c665d]/40" href="/login">Back to login</a>}
+<Layout
+  title="Redirecting | OpenSync"
+  description="Send the authenticated session back to the OpenSync desktop app."
+>
+  <AuthPageShell
+    title="The browser is done. OpenSync should take it from here."
+    description="This last step returns the authenticated session to the desktop app. If the handoff does not happen automatically, there is still a direct path back."
+    activeStep="return"
+  >
+    <section class="auth-card">
+      <header class="auth-card__header">
+        <p class="section-kicker">Return to app</p>
+        <h1 class="auth-card__title">Returning to the desktop app</h1>
+        <p class="auth-card__description">
+          {
+            nextUrl
+              ? "The session is ready. OpenSync should reopen automatically, but you can trigger it yourself if needed."
+              : "The redirect is missing token data. Start the flow again from the desktop app to create a clean handoff."
+          }
+        </p>
+      </header>
+
+      {
+        nextUrl ? (
+          <CallbackRedirect client:load nextUrl={nextUrl} />
+        ) : (
+          <div class="auth-card__footer">
+            <p>The browser step could not complete with the current redirect data.</p>
+            <a class="auth-link" href="/login">
+              Back to login
+            </a>
+          </div>
+        )
+      }
     </section>
-  </main>
+  </AuthPageShell>
 </Layout>
