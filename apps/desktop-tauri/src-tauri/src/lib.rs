@@ -61,6 +61,11 @@ pub fn run() {
             let auth = state::AuthState::new(state.load_auth_session().unwrap());
             let cache = state::CacheState::new();
             let services = services::ServicesState::new();
+            if let Some(window) = app.get_webview_window("main") {
+                if auth.is_logged_in() {
+                    let _ = window.hide();
+                }
+            }
 
             let state_inserted = app.manage(state);
             assert!(state_inserted, "AppState was already managed");
@@ -86,7 +91,6 @@ pub fn run() {
 
             app.state::<ServicesState>()
                 .sync_with_auth(app.app_handle());
-
             Ok(())
         })
         .plugin(tauri_plugin_opener::init())

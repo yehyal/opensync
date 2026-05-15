@@ -1,12 +1,15 @@
 use std::time::Duration;
 
-use crate::state::{AuthState, CacheState};
+use crate::{
+    state::{AuthState, CacheState},
+    tray::{self, ConnectionState},
+};
 use futures_util::FutureExt;
 use log::{error, info, warn};
 use rust_socketio::{asynchronous::ClientBuilder, Payload};
 use serde_json::json;
 use tauri::{async_runtime as ar, AppHandle, Manager, Runtime};
-use tokio::sync::broadcast;
+use tokio::{sync::broadcast, time::sleep};
 
 pub fn start<R: Runtime>(
     app: AppHandle<R>,
@@ -15,8 +18,11 @@ pub fn start<R: Runtime>(
     ar::spawn(async move {
         if !app.state::<AuthState>().is_logged_in() {
             info!("socket service not started: user is not logged in");
+            tray::set_connection_state(&app, ConnectionState::Offline);
             return;
         }
+
+        tray::set_connection_state(&app, ConnectionState::Connecting);
 
         if let Err(error) = socket_task(app, &mut shutdown).await {
             error!("socket task exited with error: {error}");
@@ -82,6 +88,8 @@ async fn socket_task<R: Runtime>(
         .connect()
         .await?;
     info!("Socket connected!");
+    sleep(Duration::from_secs(3)).await;
+    tray::set_connection_state(&app, ConnectionState::Connected);
     tokio::select! {
         _ = futures_util::future::pending::<()>() => {},
         _ = shutdown.recv() => {
@@ -89,6 +97,7 @@ async fn socket_task<R: Runtime>(
         }
     }
 
+    tray::set_connection_state(&app, ConnectionState::Offline);
     drop(socket);
     Ok(())
 }

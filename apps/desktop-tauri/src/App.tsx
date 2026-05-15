@@ -32,17 +32,28 @@ function App() {
     await openUrl("http://localhost:4321/register?redirect_uri=opensync://callback");
   };
 
-  const eventListener = async () => {
-    const unlistenHandle = await listen("auth://changed", (event) => {
-      console.log(event);
-      setAuthState("authenticated");
-    });
-    return unlistenHandle;
-  };
-  eventListener();
-
   useEffect(() => {
     void checkAuthState();
+  }, []);
+
+  useEffect(() => {
+    let disposed = false;
+    let unlisten: (() => void) | undefined;
+
+    async function attachAuthListener() {
+      unlisten = await listen("auth://changed", () => {
+        if (!disposed) {
+          setAuthState("authenticated");
+        }
+      });
+    }
+
+    void attachAuthListener();
+
+    return () => {
+      disposed = true;
+      unlisten?.();
+    };
   }, []);
 
 

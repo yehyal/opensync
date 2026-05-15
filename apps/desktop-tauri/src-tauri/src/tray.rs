@@ -1,13 +1,19 @@
 use tauri::{
-    menu::{Menu, MenuEvent, MenuItem},
+    menu::{IconMenuItem, Menu, MenuEvent, MenuItem, NativeIcon},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     AppHandle, Manager, Runtime,
 };
 
 use log::warn;
 
+pub const TRAY_ID: &str = "main-tray";
 const MENU_OPEN: &str = "tray.open";
 const MENU_CLOSE: &str = "tray.close";
+const MENU_CONNECTION: &str = "tray.connection";
+
+pub struct TrayState<R: Runtime> {
+    connection: IconMenuItem<R>,
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum TrayAction {
@@ -16,10 +22,25 @@ enum TrayAction {
     HideMainWindow,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ConnectionState {
+    Offline,
+    Connecting,
+    Connected,
+}
+
 pub fn setup<R: Runtime, M: Manager<R>>(app: &M) -> tauri::Result<()> {
     let open = MenuItem::with_id(app, MENU_OPEN, "Open", true, None::<&str>)?;
     let close = MenuItem::with_id(app, MENU_CLOSE, "Close", true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&open, &close])?;
+    let connection = IconMenuItem::with_id_and_native_icon(
+        app,
+        MENU_CONNECTION,
+        "Offline",
+        false,
+        Some(NativeIcon::StatusUnavailable),
+        None::<&str>,
+    )?;
+    let menu = Menu::with_items(app, &[&connection, &open, &close])?;
 
     let icon = app
         .app_handle()
@@ -27,7 +48,12 @@ pub fn setup<R: Runtime, M: Manager<R>>(app: &M) -> tauri::Result<()> {
         .cloned()
         .expect("default window icon missing");
 
-    TrayIconBuilder::with_id("main-tray")
+    let inserted = app.manage(TrayState {
+        connection: connection.clone(),
+    });
+    assert!(inserted, "TrayState was already managed");
+
+    TrayIconBuilder::with_id(TRAY_ID)
         .icon(icon)
         .menu(&menu)
         .tooltip("Opensync")
@@ -35,7 +61,24 @@ pub fn setup<R: Runtime, M: Manager<R>>(app: &M) -> tauri::Result<()> {
         .on_tray_icon_event(handle_tray_event)
         .build(app)?;
 
+    set_connection_state(app.app_handle(), ConnectionState::Offline);
+
     Ok(())
+}
+
+pub fn set_connection_state<R: Runtime>(app: &AppHandle<R>, state: ConnectionState) {
+    let item = &app.state::<TrayState<R>>().connection;
+
+    let (label, icon) = match state {
+        ConnectionState::Offline => ("Offline", Some(NativeIcon::StatusUnavailable)),
+        ConnectionState::Connecting => {
+            ("Connecting...", Some(NativeIcon::StatusPartiallyAvailable))
+        }
+        ConnectionState::Connected => ("Connected", Some(NativeIcon::StatusAvailable)),
+    };
+
+    let _ = item.set_text(label);
+    let _ = item.set_native_icon(icon);
 }
 
 fn handle_menu_event<R: Runtime>(app: &AppHandle<R>, event: MenuEvent) {

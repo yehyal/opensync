@@ -25,7 +25,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private readonly connectionsManager: ConnectionsService,
     private readonly jwtService: JwtService,
-  ) {}
+  ) { }
 
   broadcast(text: string): void {
     this.server.emit("event.created", text);
