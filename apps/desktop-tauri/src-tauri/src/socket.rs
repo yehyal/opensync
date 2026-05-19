@@ -42,6 +42,10 @@ async fn socket_task<R: Runtime>(
     let token = session.token.clone();
     // let _socket = ClientBuilder::new("https://hsiu-sociologistic-aliya.ngrok-free.dev")
     info!("Socket connection starting");
+    let app_for_error = app.clone();
+    let app_for_disconnect = app.clone();
+    let app_for_connected = app.clone();
+
     let socket = ClientBuilder::new("http://localhost:3000")
         .auth(json!({
             "token": token.clone(),
@@ -53,6 +57,22 @@ async fn socket_task<R: Runtime>(
         // Server-side may read token from either `handshake.auth` or headers/query.
         // Send it as a header too to be compatible with other gateways/middlewares.
         .opening_header("authorization", format!("Bearer {}", token))
+        .on("error", move |err, _| {
+            let app = app_for_error.clone();
+            async move {
+                tray::set_connection_state(&app, ConnectionState::Offline);
+                error!("socket error: {err:#?}");
+            }
+            .boxed()
+        })
+        .on("close", move |_, _| {
+            let app = app_for_disconnect.clone();
+            async move {
+                tray::set_connection_state(&app, ConnectionState::Offline);
+                warn!("socket disconnected");
+            }
+            .boxed()
+        })
         .on("event.created", move |payload, _| {
             let cache = cache.clone();
             async move {
@@ -85,11 +105,20 @@ async fn socket_task<R: Runtime>(
             }
             .boxed()
         })
+        .on("connected", move |_, _| {
+            let app = app_for_connected.clone();
+            info!("socket connected");
+            async move {
+                tray::set_connection_state(&app, ConnectionState::Connected);
+            }
+            .boxed()
+        })
         .connect()
-        .await?;
-    info!("Socket connected!");
-    sleep(Duration::from_secs(3)).await;
-    tray::set_connection_state(&app, ConnectionState::Connected);
+        .await
+        .inspect_err(|_| {
+            tray::set_connection_state(&app, ConnectionState::Offline);
+        })?;
+
     tokio::select! {
         _ = futures_util::future::pending::<()>() => {},
         _ = shutdown.recv() => {

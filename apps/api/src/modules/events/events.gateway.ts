@@ -70,6 +70,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       socket.data.deviceId = deviceId;
 
       this.connectionsManager.add(userId, deviceId, socket);
+      socket.emit("connected");
       console.log(`Client connected: userId=${userId}, deviceId=${deviceId}`);
     } catch (error) {
       console.error("Connection authentication failed:", error.message);

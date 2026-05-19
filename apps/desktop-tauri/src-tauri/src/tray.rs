@@ -1,5 +1,5 @@
 use tauri::{
-    menu::{IconMenuItem, Menu, MenuEvent, MenuItem, NativeIcon},
+    menu::{IconMenuItem, Menu, MenuEvent, MenuItem, NativeIcon, PredefinedMenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     AppHandle, Manager, Runtime,
 };
@@ -10,6 +10,7 @@ pub const TRAY_ID: &str = "main-tray";
 const MENU_OPEN: &str = "tray.open";
 const MENU_CLOSE: &str = "tray.close";
 const MENU_CONNECTION: &str = "tray.connection";
+const MENU_QUIT: &str = "tray.quit";
 
 pub struct TrayState<R: Runtime> {
     connection: IconMenuItem<R>,
@@ -20,6 +21,7 @@ enum TrayAction {
     None,
     ShowMainWindow,
     HideMainWindow,
+    Quit,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -32,6 +34,7 @@ pub enum ConnectionState {
 pub fn setup<R: Runtime, M: Manager<R>>(app: &M) -> tauri::Result<()> {
     let open = MenuItem::with_id(app, MENU_OPEN, "Open", true, None::<&str>)?;
     let close = MenuItem::with_id(app, MENU_CLOSE, "Close", true, None::<&str>)?;
+    let quit = MenuItem::with_id(app, MENU_QUIT, "Quit", true, None::<&str>)?;
     let connection = IconMenuItem::with_id_and_native_icon(
         app,
         MENU_CONNECTION,
@@ -40,7 +43,8 @@ pub fn setup<R: Runtime, M: Manager<R>>(app: &M) -> tauri::Result<()> {
         Some(NativeIcon::StatusUnavailable),
         None::<&str>,
     )?;
-    let menu = Menu::with_items(app, &[&connection, &open, &close])?;
+    let separator = PredefinedMenuItem::separator(app)?;
+    let menu = Menu::with_items(app, &[&connection, &open, &close, &separator, &quit])?;
 
     let icon = app
         .app_handle()
@@ -85,6 +89,8 @@ fn handle_menu_event<R: Runtime>(app: &AppHandle<R>, event: MenuEvent) {
     let action = match event.id.as_ref() {
         MENU_OPEN => TrayAction::ShowMainWindow,
         MENU_CLOSE => TrayAction::HideMainWindow,
+        MENU_QUIT => TrayAction::Quit,
+
         _ => TrayAction::None,
     };
 
@@ -109,6 +115,7 @@ fn dispatch_action<R: Runtime>(app: &AppHandle<R>, action: TrayAction) {
         TrayAction::None => {}
         TrayAction::ShowMainWindow => show_main_window(app),
         TrayAction::HideMainWindow => hide_main_window(app),
+        TrayAction::Quit => app.exit(0),
     }
 }
 
