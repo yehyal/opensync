@@ -1,13 +1,15 @@
 mod clipboard;
+mod commands;
 mod services;
 mod socket;
 mod state;
 mod tray;
+
 use serde::Deserialize;
 use serde_json::json;
 use storage::db::{DeviceRegistration, LoginResponse};
 use tauri::async_runtime::spawn;
-use tauri::{Emitter, Manager, State};
+use tauri::{Emitter, Manager};
 use tauri_plugin_deep_link::DeepLinkExt;
 use tauri_plugin_http::reqwest;
 use url::Url;
@@ -94,7 +96,10 @@ pub fn run() {
             Ok(())
         })
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![is_authenticated])
+        .invoke_handler(tauri::generate_handler![
+            commands::is_authenticated,
+            commands::get_events,
+        ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");
 
@@ -299,9 +304,4 @@ async fn register_device_if_needed<R: tauri::Runtime>(
         .map_err(|e| format!("db error saving device registration: {e}"))?;
 
     Ok(())
-}
-
-#[tauri::command]
-fn is_authenticated(state: State<'_, AuthState>) -> bool {
-    state.is_logged_in()
 }

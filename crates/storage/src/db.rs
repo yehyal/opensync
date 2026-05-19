@@ -1,4 +1,5 @@
 use rusqlite::{Connection, Error};
+use serde::Serialize;
 
 use crate::paths;
 
@@ -8,6 +9,15 @@ pub struct LoginResponse {
     pub name: String,
     pub email: String,
     pub token: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct Event {
+    pub event_id: String,
+    pub device_id: String,
+    pub content: String,
+    pub hash: String,
+    pub timestamp: String,
 }
 
 pub struct DB {
@@ -40,6 +50,18 @@ pub fn setup() -> Result<DB, Error> {
           device_name TEXT NOT NULL,
           platform TEXT NOT NULL
         )",
+        (),
+    )?;
+
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS events (
+          event_id TEXT PRIMARY KEY NOT NULL,
+          device_id TEXT NOT NULL REFERENCES devices(device_id),
+          content TEXT NOT NULL,
+          hash TEXT NOT NULL,
+          timestamp TEXT NOT NULL
+        )
+      ",
         (),
     )?;
 
@@ -143,6 +165,69 @@ impl DB {
         )?;
 
         Ok(())
+    }
+
+    pub fn insert_event(&self, event: Event) -> Result<(), Error> {
+        self.conn.execute(
+            "
+            INSERT INTO events (event_id, device_id, content, hash, timestamp)
+            VALUES (?, ?, ?, ?, ?)
+            ",
+            (
+                event.event_id,
+                event.device_id,
+                event.content,
+                event.hash,
+                event.timestamp,
+            ),
+        )?;
+
+        Ok(())
+    }
+
+    pub fn get_events(&self) -> Result<Vec<Event>, Error> {
+        let mut statement = self.conn.prepare(
+            "
+            SELECT event_id, device_id, content, hash, timestamp
+            FROM events
+            ORDER BY timestamp DESC, event_id DESC
+            ",
+        )?;
+
+        let rows = statement.query_map((), |row| {
+            Ok(Event {
+                event_id: row.get(0)?,
+                device_id: row.get(1)?,
+                content: row.get(2)?,
+                hash: row.get(3)?,
+                timestamp: row.get(4)?,
+            })
+        })?;
+
+        rows.collect()
+    }
+
+    pub fn get_events_for_device(&self, device_id: &str) -> Result<Vec<Event>, Error> {
+        let mut statement = self.conn.prepare(
+            "
+            SELECT event_id, device_id, content, hash, timestamp
+            FROM events
+            WHERE device_id = ?
+            ORDER BY timestamp DESC, event_id DESC
+            ",
+        )?;
+
+        let rows = statement.query_map((device_id,), |row| {
+            Ok(Event {
+                event_id: row.get(0)?,
+                device_id: row.get(1)?,
+                content: row.get(2)?,
+                hash: row.get(3)?,
+                timestamp: row.get(4)?,
+            })
+        })?;
+
+        rows.collect()
     }
 }
 
